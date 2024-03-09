@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="drink_selector/drink_selector.css">
-    <script src="drink_selector/drink_selector.mjs" async></script>
+    <script src="drink_selector/drink_selector.mjs" defer></script>
     <title>Drink Selector</title>
 </head>
 <body>
 <form method="POST" action="/add_order">
     <ul id="drink-grid">
-        <li><a href="?layout=tap_beer">Fassbier</a></li>
+        <li><button type="submit" name="order" value="tap_einbecker_300">Einbecker (Fass) 0,3l</button></li>
+        <li><button type="submit" name="order" value="tap_einbecker_300">Einbecker Radler (Fass) 0,3l</button></li>
+        <li><button type="submit" name="order" value="tap_guinness_300">Guinness (Fass) 0,3l</button></li>
+        <li><button type="submit" name="order" value="tap_strongbow_300">Strongbow (Fass) 0,3l</button></li>
+        <li><button type="submit" name="order" value="tap_snakebite_300">Snakebite (Fass) 0,5l</button></li>
+        <li><a href="?layout=party_longdrinks">Longdrinks</a></li>
+        <li><a href="?layout=party_bottled_beers">Flaschenbier</a></li>
+        <li><a href="?layout=party_shots">Shots</a></li>
+        <li><a href="?layout=party_softdrinks">Softdrinks</a></li>
     </ul>
 </form>
 </body>
