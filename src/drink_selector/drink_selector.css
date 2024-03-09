@@ -1,0 +1,41 @@
+body {
+    box-sizing: border-box;
+    max-width: 1000px;
+    height: min(100svh, 800px);
+    margin: 0;
+    padding: .5em;
+}
+
+form {
+    height: 100%;
+}
+
+#drink-grid {
+    display: grid;
+    height: 100%;
+    grid-template: repeat(5, 1fr) / repeat(5, 1fr);
+    gap: 1%;
+
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+#drink-grid li {
+    display: flex;
+    align-items: center;
+}
+
+#drink-grid li > * {
+    flex-grow: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+#drink-grid button {
+    height: 100%;
+}
+
+#drink-grid a {
+    text-align: center;
+}
