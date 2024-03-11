@@ -1,8 +1,8 @@
 from wsgiref.types import WSGIEnvironment, StartResponse
-from datastores import DataStore
-from resources import Resources
-from router import route
-from settings import Settings
+from kellerclub_drinks.datastores import DataStore
+from kellerclub_drinks.resources import Resources
+from kellerclub_drinks.router import route
+from kellerclub_drinks.settings import Settings
 
 
 settings: Settings = Settings.get_settings()

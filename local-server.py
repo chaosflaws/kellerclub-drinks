@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import shutil
 import sys
+from typing import Any
 from wsgiref.types import WSGIApplication
 from threading import Event
 from wsgiref.simple_server import make_server
@@ -38,7 +39,7 @@ def main():
 
 def get_compiled_app() -> WSGIApplication:
     with open('app.wsgi', 'rb') as app_file:
-        app_globals = {}
+        app_globals: dict[str, Any] = {}
         exec(app_file.read(), app_globals)
         return app_globals['application']
 
