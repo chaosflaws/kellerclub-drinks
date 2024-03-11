@@ -8,7 +8,7 @@ from kellerclub_drinks.datastores import SqliteStore
 class TestSqliteStore(unittest.TestCase):
     def setUp(self):
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
-            with open('../../src/init.sql', 'r') as sql_file:
+            with open('../src/init.sql', 'r') as sql_file:
                 sql = sql_file.read()
                 db.executescript(sql)
 
