@@ -13,22 +13,24 @@ class Settings:
 
     @staticmethod
     def get_settings() -> Settings:
-        return Settings.from_file('settings.json')
+        """Returns the settings in the currently evaluated settings file."""
+
+        return Settings._from_file('settings.json')
 
     @staticmethod
-    def from_file(filename: str) -> Settings:
+    def _from_file(filename: str) -> Settings:
         try:
             settings_file = open(filename, 'r', encoding='utf8')
         except OSError as e:
             print("Could not read settings file!")
             raise e
-        else:
-            with settings_file:
-                settings_json = json.load(settings_file)
-                return Settings._parse_settings(settings_json)
+
+        with settings_file:
+            settings_json = json.load(settings_file)
+            return Settings._parse_settings(settings_json)
 
     @staticmethod
-    def from_json_string(json_string: str) -> Settings:
+    def _from_json_string(json_string: str) -> Settings:
         return Settings._parse_settings(json.loads(json_string))
 
     @staticmethod
