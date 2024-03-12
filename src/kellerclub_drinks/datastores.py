@@ -70,10 +70,15 @@ class SqliteStore(DataStore):
                 conn.execute("INSERT INTO PurchaseOrder(drink_name) VALUES (?)", (drink,))
             except IntegrityError as e:
                 if e.sqlite_errorname == 'SQLITE_CONSTRAINT_PRIMARYKEY':
-                    randomized_timestamp = self._now_plus_random_milliseconds(1_000)
-                    conn.execute("INSERT INTO PurchaseOrder(time, drink_name) VALUES (?, ?)", (randomized_timestamp, drink))
+                    self._add_order_with_random_time_delta(drink, conn)
                 else:
                     raise e
+
+    @staticmethod
+    def _add_order_with_random_time_delta(drink: str, conn: sqlite3.Connection):
+        randomized_timestamp = SqliteStore._now_plus_random_milliseconds(1_000)
+        sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (?, ?)"
+        conn.execute(sql_template, (randomized_timestamp, drink))
 
     @staticmethod
     def _now_plus_random_milliseconds(max_diff_millis: int) -> float:
