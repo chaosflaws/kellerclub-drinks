@@ -18,7 +18,7 @@ class Settings:
     @staticmethod
     def from_file(filename: str) -> Settings:
         try:
-            settings_file = open(filename, 'r')
+            settings_file = open(filename, 'r', encoding='utf8')
         except OSError as e:
             print("Could not read settings file!")
             raise e
