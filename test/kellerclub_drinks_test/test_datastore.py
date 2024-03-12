@@ -13,4 +13,4 @@ class TestDatastore(unittest.TestCase):
             'path': 'db.sqlite'
         }
 
-        self.assertIsInstance(DataStore.create(settings), SqliteStore)
+        self.assertIsInstance(DataStore.from_settings(settings), SqliteStore)

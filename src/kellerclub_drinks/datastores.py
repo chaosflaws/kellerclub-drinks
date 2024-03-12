@@ -18,7 +18,9 @@ class DataStore(ABC):
     """A resource that provides persistence functionality for the application."""
 
     @staticmethod
-    def create(settings: dict[str, Any]) -> DataStore:
+    def from_settings(settings: dict[str, Any]) -> DataStore:
+        """Creates a datastore based on the settings file."""
+
         if settings['type'] == 'sqlite':
             try:
                 path = Path(settings['path'])
