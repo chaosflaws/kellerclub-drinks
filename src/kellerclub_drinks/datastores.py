@@ -1,3 +1,8 @@
+"""
+Interface and implementations for datastores that can be used with this
+application.
+"""
+
 from __future__ import annotations
 
 import random
@@ -10,6 +15,8 @@ from typing import Any
 
 
 class DataStore(ABC):
+    """A resource that provides persistence functionality for the application."""
+
     @staticmethod
     def create(settings: dict[str, Any]) -> DataStore:
         if settings['type'] == 'sqlite':
@@ -26,18 +33,23 @@ class DataStore(ABC):
 
     @abstractmethod
     def get_all_drinks(self) -> list[str]:
-        pass
+        """Returns the list of drinks added to the application."""
 
     @abstractmethod
     def add_drink(self, drink: str) -> None:
-        pass
+        """
+        Adds the drink with the given name to the list of drinks the application
+        can process.
+        """
 
     @abstractmethod
     def add_order(self, drink: str) -> None:
-        pass
+        """Adds an order with the current timestamp to the list of orders."""
 
 
 class SqliteStore(DataStore):
+    """A datastore using sqlite."""
+
     def __init__(self, path: Path | str):
         self.path = path
 

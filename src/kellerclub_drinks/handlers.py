@@ -1,3 +1,5 @@
+"""Contains commonly used request handlers."""
+
 from abc import ABC, abstractmethod
 from pathlib import Path
 from wsgiref.types import StartResponse
@@ -7,12 +9,19 @@ from .response_creators import ErrorCreator, SuccessCreator, RedirectCreator
 
 
 class Handler(ABC):
+    """Handles HTTP requests it receives from the router."""
+
     @abstractmethod
     def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
-        pass
+        """
+        Receives a single HTTP request and must process it by passing
+        appropriate headers to start_response and providing a response body.
+        """
 
 
 class StaticHandler(Handler):
+    """A handler that serves static files."""
+
     def __init__(self, request_path: str, content_type: str):
         self.request_path = request_path
         self.content_type = content_type
@@ -28,6 +37,8 @@ class StaticHandler(Handler):
 
 
 class RedirectHandler(Handler):
+    """A handler that redirects the client to another resource."""
+
     def __init__(self, new_path: str):
         self.new_path = new_path
 
@@ -36,6 +47,11 @@ class RedirectHandler(Handler):
 
 
 class ErrorHandler(Handler):
+    """
+    A handler that serves a generic error message according to the selected
+    status code.
+    """
+
     def __init__(self, status_code: int):
         self.status_code = status_code
 

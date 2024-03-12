@@ -1,3 +1,5 @@
+"""Provides global resources to the application."""
+
 from jinja2 import Environment, FileSystemLoader
 
 from .datastores import DataStore

@@ -1,14 +1,28 @@
+"""
+Interface and implementations of response creators.
+"""
+
 from abc import ABC, abstractmethod
 from wsgiref.types import StartResponse
 
 
 class ResponseCreator(ABC):
+    """Sends a response back to the WSGI server."""
+
     @abstractmethod
     def serve(self, start_response: StartResponse) -> list[bytes]:
-        pass
+        """
+        Sets appropriate headers when calling start_response and returns the
+        response body.
+        """
 
 
 class ErrorCreator(ResponseCreator):
+    """
+    Serves an error page for the given status code, if that status code is
+    registered. Otherwise, sends a generic code 400 error message.
+    """
+
     STATUS_CODES = {
         400: 'Bad Request',
         404: 'Not Found'
@@ -29,6 +43,8 @@ class ErrorCreator(ResponseCreator):
 
 
 class SuccessCreator(ResponseCreator):
+    """Delivers the given content as a successful HTTP response."""
+
     def __init__(self, content_type: str, content: bytes):
         self.content_type = content_type
         self.content = content
@@ -42,11 +58,14 @@ class SuccessCreator(ResponseCreator):
 
 
 class HtmlCreator(SuccessCreator):
+    """Serves HTML content as a successful HTTP response."""
     def __init__(self, content: bytes):
         super().__init__('text/html; charset=utf-8', content)
 
 
 class RedirectCreator(ResponseCreator):
+    """Serves an HTTP response containing a generic redirect."""
+
     def __init__(self, new_path: str):
         self.new_path = new_path
 

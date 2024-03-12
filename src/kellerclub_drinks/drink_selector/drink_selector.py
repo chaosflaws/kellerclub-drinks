@@ -6,6 +6,8 @@ from ..response_creators import HtmlCreator
 
 
 class DrinkSelector(Handler):
+    """Provides an HTML interface to add lots of orders quickly."""
+
     def __init__(self, layout: str = 'drink_selector'):
         self.layout = layout
 

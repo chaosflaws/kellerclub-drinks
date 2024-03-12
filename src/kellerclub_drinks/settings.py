@@ -7,6 +7,8 @@ from typing import Any
 
 @dataclass(frozen=True)
 class Settings:
+    """Application settings that can be adjusted in a settings file."""
+
     data_store_settings: dict[str, Any]
 
     @staticmethod

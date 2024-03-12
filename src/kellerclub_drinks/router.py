@@ -1,3 +1,5 @@
+"""Methods to deliver an HTTP request to the appropriate handler."""
+
 import re
 from typing import Optional
 from urllib.parse import parse_qs
@@ -11,6 +13,8 @@ from .handlers import Handler, ErrorHandler, StaticHandler
 
 
 def route(environ: WSGIEnvironment) -> Handler:
+    """Delivers an HTTP request to the appropriate handler."""
+
     method: str = environ['REQUEST_METHOD']
     path: str = environ['PATH_INFO']
     query: Optional[str] = environ.get('QUERY_STRING', None)

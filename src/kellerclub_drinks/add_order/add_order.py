@@ -6,6 +6,8 @@ from ..response_creators import RedirectCreator
 
 
 class AddOrder(Handler):
+    """Adds a time-stamped drink order to the datastore."""
+
     def __init__(self, drink_name: str):
         self.drink_name = drink_name
 

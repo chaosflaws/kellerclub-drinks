@@ -6,6 +6,8 @@ from ..response_creators import HtmlCreator
 
 
 class DrinkList(Handler):
+    """Returns the drinks currently available in the application."""
+
     def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
         drinks = res.datastore.get_all_drinks()
         template = res.jinjaenv.get_template('kellerclub_drinks/drink_list/drink_list.html')
