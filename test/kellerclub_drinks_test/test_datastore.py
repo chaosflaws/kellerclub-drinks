@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 import unittest
 
 from kellerclub_drinks.datastores import DataStore, SqliteStore
