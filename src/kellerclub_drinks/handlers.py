@@ -32,7 +32,7 @@ class StaticHandler(Handler):
             with open(f'kellerclub_drinks/{file_path}', 'rb') as file:
                 content = file.read()
             return SuccessCreator(self.content_type, content).serve(start_response)
-        except Exception:
+        except OSError:
             return ErrorCreator(404).serve(start_response)
 
 
