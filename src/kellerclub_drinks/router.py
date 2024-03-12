@@ -46,7 +46,7 @@ def _route_get(path: str, query: Optional[str]):
     if not _valid_path(path):
         print(f'Invalid path {path}!')
         return ErrorHandler(400)
-    if path == '/' or path == '':
+    if path in {'/', ''}:
         payload = parse_qs(query)
 
         if not payload:
