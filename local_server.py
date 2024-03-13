@@ -3,9 +3,9 @@ import os
 import shutil
 import sys
 from typing import Any
-from wsgiref.types import WSGIApplication
 from threading import Event
 from wsgiref.simple_server import make_server
+from wsgiref.types import WSGIApplication
 
 should_exit = Event()
 
