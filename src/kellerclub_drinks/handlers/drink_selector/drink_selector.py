@@ -5,8 +5,8 @@ from kellerclub_drinks.resources import Resources
 from kellerclub_drinks.response_creators import HtmlCreator
 
 
-LAYOUT_NOT_FOUND_TEMPLATE = 'kellerclub_drinks/drink_selector/layout_not_found.jinja2'
-SELECTOR_TEMPLATE = 'kellerclub_drinks/drink_selector/drink_selector.jinja2'
+LAYOUT_NOT_FOUND_TEMPLATE = 'drink_selector/layout_not_found.jinja2'
+SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
 
 
 class DrinkSelector(Handler):

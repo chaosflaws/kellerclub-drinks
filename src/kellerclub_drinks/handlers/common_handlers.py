@@ -29,7 +29,7 @@ class StaticHandler(Handler):
     def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
         try:
             file_path = Path(self.request_path.removeprefix('/'))
-            with open(f'kellerclub_drinks/{file_path}', 'rb') as file:
+            with open(f'kellerclub_drinks/handlers/{file_path}', 'rb') as file:
                 content = file.read()
             return SuccessCreator(self.content_type, content).serve(start_response)
         except OSError:
