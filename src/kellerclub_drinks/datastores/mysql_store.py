@@ -14,7 +14,10 @@ class MysqlStore(DataStore):
                                         database=db)
 
     def get_all_drinks(self) -> dict[str, Drink]:
-        pass
+        with self.pool.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name, display_name FROM Drink")
+            return {row[0]: Drink(row[1]) for row in cursor}
 
     def add_drink(self, drink: str) -> None:
         pass
