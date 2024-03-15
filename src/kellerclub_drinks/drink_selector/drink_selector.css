@@ -23,7 +23,6 @@ form {
 
 #drink-grid li {
     display: flex;
-    align-items: center;
 }
 
 #drink-grid li > * {
@@ -32,10 +31,11 @@ form {
     touch-action: manipulation;
 }
 
-#drink-grid button {
-    height: 100%;
-}
-
 #drink-grid a {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: lightyellow;
+    border-radius: 1em;
 }

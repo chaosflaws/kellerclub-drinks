@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="drink_selector/drink_selector.css">
+    <script src="drink_selector/drink_selector.mjs" defer></script>
+    <title>Drink Selector</title>
+</head>
+<body>
+<form method="POST" action="/kellerclub_drinks/add_orderb_drinks/add_order">
+    <ul id="drink-grid">
+        {% for row in layout.buttons %}
+            {% for button in row %}
+                {% if button is none %}
+                    <li></li>
+                {% elif button.is_order_button %}
+                    <li><button type="submit" name="order" value="{{ button.drink_name }}">{{ button.display_name }}</button></li>
+                {% elif button.is_link %}
+                    <li><a href="?layout={{ button.layout }}">{{ button.display_name }}</a></li>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</form>
+</body>
+</html>

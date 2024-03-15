@@ -9,9 +9,13 @@ import random
 import sqlite3
 import time
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from pathlib import Path
 from sqlite3 import IntegrityError
-from typing import Any
+from typing import Any, Optional
+
+from .model.drinks import Drink
+from .model.layouts import Layout, Button, OrderButton, LinkButton
 
 
 class DataStore(ABC):
@@ -34,8 +38,11 @@ class DataStore(ABC):
         raise ValueError('Unrecognized data store type!')
 
     @abstractmethod
-    def get_all_drinks(self) -> list[str]:
-        """Returns the list of drinks added to the application."""
+    def get_all_drinks(self) -> dict[str, Drink]:
+        """
+        Returns a mapping from drink names to drinks for all drinks added to the
+        application.
+        """
 
     @abstractmethod
     def add_drink(self, drink: str) -> None:
@@ -48,6 +55,10 @@ class DataStore(ABC):
     def add_order(self, drink: str) -> None:
         """Adds an order with the current timestamp to the list of orders."""
 
+    @abstractmethod
+    def get_all_layouts(self) -> dict[str, Layout]:
+        """Returns all persisted layouts, identified by their names."""
+
 
 class SqliteStore(DataStore):
     """A datastore using sqlite."""
@@ -55,10 +66,11 @@ class SqliteStore(DataStore):
     def __init__(self, path: Path | str):
         self.path = path
 
-    def get_all_drinks(self) -> list[str]:
+    def get_all_drinks(self) -> dict[str, Drink]:
         with sqlite3.connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
-            return [row[0] for row in conn.execute("SELECT name FROM Drink").fetchall()]
+            sql_template = "SELECT name, display_name FROM Drink"
+            return {row[0]: Drink(row[1]) for row in conn.execute(sql_template).fetchall()}
 
     def add_drink(self, drink: str) -> None:
         with sqlite3.connect(self.path, uri=True) as conn:
@@ -90,3 +102,54 @@ class SqliteStore(DataStore):
         updated_millis = current_millis + random_millis
         updated_sec = updated_millis / 1e3
         return updated_sec
+
+    def get_all_layouts(self) -> dict[str, Layout]:
+        layout_name: str
+        xpos: int
+        ypos: int
+        display_name: str
+        drink_name: str
+        linked_layout: str
+
+        with sqlite3.connect(self.path, uri=True) as conn:
+            conn.execute("PRAGMA foreign_keys = ON;")
+            order_button_rows = conn.execute(self._get_all_order_buttons_template)
+            link_button_rows = conn.execute(self._get_all_link_buttons_template)
+
+        buttons_to_layouts: dict[str, list[list[Optional[Button]]]] = defaultdict(lambda: self._empty_grid(5, 5))
+
+        for row in order_button_rows:
+            layout_name, xpos, ypos, display_name, drink_name = row
+            buttons_to_layouts[layout_name][xpos][ypos] = OrderButton(display_name, drink_name)
+
+        for row in link_button_rows:
+            layout_name, xpos, ypos, display_name, linked_layout = row
+            buttons_to_layouts[layout_name][xpos][ypos] = LinkButton(display_name, linked_layout)
+
+        layouts = {k: Layout(k, v) for k, v in buttons_to_layouts.items()}
+        for layout in layouts:
+            for rows in layout:
+                for button in rows:
+                    if isinstance(button, LinkButton):
+                        setattr(button, 'layout', layouts[button.layout])
+
+        return layouts
+
+    _get_all_order_buttons_template = """
+SELECT layout_name, xpos, ypos, display_name, drink_name
+FROM OrderButton
+JOIN SelectorButton ON OrderButton.button_id == SelectorButton.id
+"""
+
+    _get_all_link_buttons_template = """
+SELECT layout_name, xpos, ypos, display_name, linked_layout
+FROM LinkButton
+JOIN SelectorButton ON LinkButton.button_id == SelectorButton.id
+"""
+
+    @staticmethod
+    def _empty_grid(x: int, y: int) -> list[list[Optional[Button]]]:
+        result: list[list[Optional[None]]] = []
+        for _ in range(y):
+            result.append([None] * x)
+        return result
