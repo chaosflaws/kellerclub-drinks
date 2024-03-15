@@ -1,5 +1,5 @@
 from wsgiref.types import WSGIEnvironment, StartResponse
-from kellerclub_drinks.datastores import DataStore
+from kellerclub_drinks.datastores.datastore import DataStore
 from kellerclub_drinks.resources import Resources
 from kellerclub_drinks.router import route
 from kellerclub_drinks.settings import Settings

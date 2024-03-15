@@ -1,63 +1,14 @@
-"""
-Interface and implementations for datastores that can be used with this
-application.
-"""
-
-from __future__ import annotations
-
 import random
 import sqlite3
 import time
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
 from sqlite3 import IntegrityError
-from typing import Any, Optional
+from typing import Optional
 
-from .model.drinks import Drink
-from .model.layouts import Layout, Button, OrderButton, LinkButton
-
-
-class DataStore(ABC):
-    """A resource that provides persistence functionality for the application."""
-
-    @staticmethod
-    def from_settings(settings: dict[str, Any]) -> DataStore:
-        """Creates a datastore based on the settings file."""
-
-        if settings['type'] == 'sqlite':
-            try:
-                path = Path(settings['path'])
-            except KeyError as e:
-                raise ValueError('SQLite database path not specified!') from e
-            return SqliteStore(path)
-
-        if settings['type'] == 'mysql':
-            raise NotImplementedError()
-
-        raise ValueError('Unrecognized data store type!')
-
-    @abstractmethod
-    def get_all_drinks(self) -> dict[str, Drink]:
-        """
-        Returns a mapping from drink names to drinks for all drinks added to the
-        application.
-        """
-
-    @abstractmethod
-    def add_drink(self, drink: str) -> None:
-        """
-        Adds the drink with the given name to the list of drinks the application
-        can process.
-        """
-
-    @abstractmethod
-    def add_order(self, drink: str) -> None:
-        """Adds an order with the current timestamp to the list of orders."""
-
-    @abstractmethod
-    def get_all_layouts(self) -> dict[str, Layout]:
-        """Returns all persisted layouts, identified by their names."""
+from .datastore import DataStore
+from ..model.drinks import Drink
+from ..model.layouts import Button, Layout, OrderButton, LinkButton
 
 
 class SqliteStore(DataStore):
