@@ -5,11 +5,11 @@ from typing import Optional
 from urllib.parse import parse_qs
 from wsgiref.types import WSGIEnvironment
 
-from .add_drink.add_drink import AddDrink
-from .drink_list.drink_list import DrinkList
-from .add_order.add_order import AddOrder
-from .drink_selector.drink_selector import DrinkSelector
-from .handlers import Handler, ErrorHandler, StaticHandler
+from .handlers.add_drink import AddDrink
+from .handlers.drink_list.drink_list import DrinkList
+from .handlers.add_order import AddOrder
+from .handlers.drink_selector.drink_selector import DrinkSelector
+from .handlers.common_handlers import Handler, ErrorHandler, StaticHandler
 
 
 def route(environ: WSGIEnvironment) -> Handler:

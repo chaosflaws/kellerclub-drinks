@@ -1,8 +1,8 @@
 from wsgiref.types import StartResponse
 
-from ..handlers import Handler
-from ..resources import Resources
-from ..response_creators import RedirectCreator
+from kellerclub_drinks.handlers.common_handlers import Handler
+from kellerclub_drinks.resources import Resources
+from kellerclub_drinks.response_creators import RedirectCreator
 
 
 class AddDrink(Handler):

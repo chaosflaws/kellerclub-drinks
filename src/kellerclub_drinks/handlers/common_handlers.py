@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from wsgiref.types import StartResponse
 
-from .resources import Resources
-from .response_creators import ErrorCreator, SuccessCreator, RedirectCreator
+from ..resources import Resources
+from ..response_creators import ErrorCreator, SuccessCreator, RedirectCreator
 
 
 class Handler(ABC):
