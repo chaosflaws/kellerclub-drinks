@@ -7,6 +7,7 @@ from sqlite3 import IntegrityError
 from typing import Optional
 
 from .datastore import DataStore
+from .layout_factory import from_button_rows
 from ..model.drinks import Drink
 from ..model.layouts import Button, Layout, OrderButton, LinkButton
 
@@ -55,47 +56,27 @@ class SqliteStore(DataStore):
         return updated_sec
 
     def get_all_layouts(self) -> dict[str, Layout]:
-        layout_name: str
-        xpos: int
-        ypos: int
-        display_name: str
-        drink_name: str
-        linked_layout: str
-
         with sqlite3.connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
             order_button_rows = conn.execute(self._get_all_order_buttons_template)
             link_button_rows = conn.execute(self._get_all_link_buttons_template)
 
-        buttons_to_layouts: dict[str, list[list[Optional[Button]]]] = defaultdict(lambda: self._empty_grid(5, 5))
-
-        for row in order_button_rows:
-            layout_name, xpos, ypos, display_name, drink_name = row
-            buttons_to_layouts[layout_name][xpos][ypos] = OrderButton(display_name, drink_name)
-
-        for row in link_button_rows:
-            layout_name, xpos, ypos, display_name, linked_layout = row
-            buttons_to_layouts[layout_name][xpos][ypos] = LinkButton(display_name, linked_layout)
-
-        layouts = {k: Layout(k, v) for k, v in buttons_to_layouts.items()}
-        for layout in layouts:
-            for rows in layout:
-                for button in rows:
-                    if isinstance(button, LinkButton):
-                        setattr(button, 'layout', layouts[button.layout])
-
-        return layouts
+        return from_button_rows(list(order_button_rows), list(link_button_rows))
 
     _get_all_order_buttons_template = """
-SELECT layout_name, xpos, ypos, display_name, drink_name
+SELECT
+    layout_name, xpos, ypos,
+    coalesce(SelectorButton.display_name, Drink.display_name) AS display_name,
+    drink_name
 FROM OrderButton
-JOIN SelectorButton ON OrderButton.button_id == SelectorButton.id
+JOIN SelectorButton ON OrderButton.button_id = SelectorButton.id
+JOIN Drink ON OrderButton.drink_name = Drink.name
 """
 
     _get_all_link_buttons_template = """
 SELECT layout_name, xpos, ypos, display_name, linked_layout
 FROM LinkButton
-JOIN SelectorButton ON LinkButton.button_id == SelectorButton.id
+JOIN SelectorButton ON LinkButton.button_id = SelectorButton.id
 """
 
     @staticmethod

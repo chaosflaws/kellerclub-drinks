@@ -66,3 +66,22 @@ class TestSqliteStore(unittest.TestCase):
 
         self.assertEqual(1, len(layouts))
         self.assertIsInstance(layouts[layout_name].buttons[0][0], OrderButton)
+
+    def test_get_all_layouts__empty_order_button_display_name__uses_drink_name(self):
+        drink_name = 'tap_beer'
+        display_name = 'Tap Beer .4l'
+        layout_name = 'simple_layout'
+        with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
+            insert_drink_template = "INSERT INTO DRINK(name, display_name) VALUES (?, ?)"
+            db.execute(insert_drink_template, (drink_name, display_name))
+            insert_layout_template = "INSERT INTO SelectorLayout(name) VALUES (?)"
+            db.execute(insert_layout_template, (layout_name,))
+            insert_button_template = "INSERT INTO SelectorButton(layout_name, xpos, ypos, display_name) VALUES (?, ?, ?, ?) RETURNING id"
+            inserted_row_id, = db.execute(insert_button_template, (layout_name, 0, 0, None)).fetchone()
+            insert_order_button_template = "INSERT INTO OrderButton(button_id, drink_name) VALUES (?, ?)"
+            db.execute(insert_order_button_template, (inserted_row_id, drink_name))
+
+        store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
+        layouts = store.get_all_layouts()
+
+        self.assertEqual(display_name, layouts[layout_name].buttons[0][0].display_name)
