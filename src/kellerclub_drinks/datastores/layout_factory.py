@@ -4,11 +4,11 @@ from typing import Optional
 from ..model.layouts import Button, OrderButton, LinkButton, Layout
 
 OrderRow = tuple[
-    str,            # layout_name
-    int,            # xpos
-    int,            # ypos
-    Optional[str],  # display_name
-    str]            # drink_name
+    str,  # layout_name
+    int,  # xpos
+    int,  # ypos
+    str,  # display_name
+    str]  # drink_name
 
 LinkRow = tuple[
     str,  # layout_name
