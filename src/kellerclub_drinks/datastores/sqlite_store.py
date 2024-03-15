@@ -78,10 +78,3 @@ SELECT layout_name, xpos, ypos, display_name, linked_layout
 FROM LinkButton
 JOIN SelectorButton ON LinkButton.button_id = SelectorButton.id
 """
-
-    @staticmethod
-    def _empty_grid(x: int, y: int) -> list[list[Optional[Button]]]:
-        result: list[list[Optional[None]]] = []
-        for _ in range(y):
-            result.append([None] * x)
-        return result
