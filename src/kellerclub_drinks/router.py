@@ -10,6 +10,7 @@ from .handlers.drink_list.drink_list import DrinkList
 from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
 from .handlers.common_handlers import Handler, ErrorHandler, StaticHandler
+from .model.drinks import Drink
 
 
 def route(environ: WSGIEnvironment) -> Handler:
@@ -84,28 +85,42 @@ def _valid_layout(path: str) -> bool:
 
 def _route_post(path: str, content_type: Optional[str], content: bytes):
     if path == '/add_order':
-        if content_type != 'application/x-www-form-urlencoded':
+        try:
+            parser = FormParser(order=1)
+            parsed_query = parser.parse(content_type or '', content.decode())
+            return AddOrder(parsed_query['order'][0])
+        except ValueError:
             return ErrorHandler(400)
-
-        payload = parse_qs(content.decode())
-        if 'order' not in payload:
-            return ErrorHandler(400)
-
-        if len(payload['order']) != 1:
-            return ErrorHandler(400)
-
-        return AddOrder(payload['order'][0])
     elif path == '/add_drink':
-        if content_type != 'application/x-www-form-urlencoded':
+        try:
+            parser = FormParser(drink=1, display_name=1)
+            parsed_query = parser.parse(content_type or '', content.decode())
+            name = parsed_query['drink'][0]
+            display_name = parsed_query['display_name'][0]
+            return AddDrink(Drink(name, display_name))
+        except ValueError:
             return ErrorHandler(400)
-
-        payload = parse_qs(content.decode())
-        if 'drink' not in payload:
-            return ErrorHandler(400)
-
-        if len(payload['drink']) != 1:
-            return ErrorHandler(400)
-
-        return AddDrink(payload['drink'][0])
     else:
         return ErrorHandler(400)
+
+
+class FormParser:
+    def __init__(self, **valid_params: int):
+        self.valid_params = valid_params
+
+    def parse(self, content_type: str, query: str) -> dict[str, list[str]]:
+        if content_type != 'application/x-www-form-urlencoded':
+            raise ValueError('Wrong Content Type!')
+
+        payload = parse_qs(query)
+
+        if len(payload) != len(self.valid_params):
+            raise ValueError('Argument list has wrong length!')
+
+        for param in self.valid_params:
+            if param not in payload:
+                raise ValueError(f'Param {param} not valid!')
+            if len(payload[param]) != self.valid_params[param]:
+                raise ValueError(f'Param {param} has wrong number of values!')
+
+        return payload

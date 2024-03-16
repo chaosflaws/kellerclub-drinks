@@ -22,12 +22,13 @@ class SqliteStore(DataStore):
         with sqlite3.connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
             sql_template = "SELECT name, display_name FROM Drink"
-            return {row[0]: Drink(row[1]) for row in conn.execute(sql_template).fetchall()}
+            return {row[0]: Drink(row[0], row[1]) for row in conn.execute(sql_template).fetchall()}
 
-    def add_drink(self, drink: str) -> None:
+    def add_drink(self, drink: Drink) -> None:
         with sqlite3.connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
-            conn.execute("INSERT INTO Drink(name) VALUES (?)", (drink,))
+            sql_template = "INSERT INTO Drink(name, display_name) VALUES (?, ?)"
+            conn.execute(sql_template, (drink.name, drink.display_name))
 
     def add_order(self, drink: str) -> None:
         with sqlite3.connect(self.path, uri=True) as conn:

@@ -19,7 +19,7 @@ class DataStore(ABC):
         """
 
     @abstractmethod
-    def add_drink(self, drink: str) -> None:
+    def add_drink(self, drink: Drink) -> None:
         """
         Adds the drink with the given name to the list of drinks the application
         can process.

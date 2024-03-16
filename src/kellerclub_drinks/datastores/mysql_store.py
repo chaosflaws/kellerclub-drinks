@@ -17,10 +17,15 @@ class MysqlStore(DataStore):
         with self.pool.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT name, display_name FROM Drink")
-            return {row[0]: Drink(row[1]) for row in cursor}
+            return {row[0]: Drink(row[0], row[1]) for row in cursor}
 
-    def add_drink(self, drink: str) -> None:
-        pass
+    def add_drink(self, drink: Drink) -> None:
+        with self.pool.get_connection() as conn:
+            cursor = conn.cursor()
+            sql_template = "INSERT INTO Drink(name, display_name) VALUES (%s, %s)"
+            print(drink.name, drink.display_name)
+            cursor.execute(sql_template, (drink.name, drink.display_name))
+            conn.commit()
 
     def add_order(self, drink: str) -> None:
         pass
