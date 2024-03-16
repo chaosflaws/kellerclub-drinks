@@ -1,7 +1,8 @@
-from mysql.connector.pooling import MySQLConnectionPool
+from mysql.connector import IntegrityError
+from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 
 from .layout_factory import from_button_rows
-from ..datastores.datastore import DataStore
+from ..datastores.datastore import DataStore, _now_plus_random_milliseconds
 from ..model.drinks import Drink
 from ..model.layouts import Layout
 
@@ -28,7 +29,25 @@ class MysqlStore(DataStore):
             conn.commit()
 
     def add_order(self, drink: str) -> None:
-        pass
+        with self.pool.get_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                sql_template = "INSERT INTO PurchaseOrder(drink_name) VALUES (%s)"
+                cursor.execute(sql_template, (drink,))
+                conn.commit()
+            except IntegrityError as e:
+                if e.errno == 1062:
+                    self._add_order_with_random_time_delta(drink, conn)
+                else:
+                    raise e
+
+    @staticmethod
+    def _add_order_with_random_time_delta(drink: str, conn: PooledMySQLConnection):
+        randomized_timestamp = _now_plus_random_milliseconds(1_000)
+        sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (from_unixtime(%s), %s)"
+        cursor = conn.cursor()
+        cursor.execute(sql_template, (randomized_timestamp, drink))
+        conn.commit()
 
     def get_all_layouts(self) -> dict[str, Layout]:
         with self.pool.get_connection() as conn:

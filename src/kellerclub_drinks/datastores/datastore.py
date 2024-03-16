@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import random
+import time
 from abc import ABC, abstractmethod
 
 from ..model.drinks import Drink
@@ -32,3 +34,12 @@ class DataStore(ABC):
     @abstractmethod
     def get_all_layouts(self) -> dict[str, Layout]:
         """Returns all persisted layouts, identified by their names."""
+
+
+def _now_plus_random_milliseconds(max_diff_millis: int) -> float:
+    random_millis = random.randint(1, max_diff_millis)
+    current_nanos = time.time_ns()
+    current_millis = current_nanos // 1e6
+    updated_millis = current_millis + random_millis
+    updated_sec = updated_millis / 1e3
+    return updated_sec

@@ -1,15 +1,11 @@
-import random
 import sqlite3
-import time
-from collections import defaultdict
 from pathlib import Path
 from sqlite3 import IntegrityError
-from typing import Optional
 
-from .datastore import DataStore
+from .datastore import DataStore, _now_plus_random_milliseconds
 from .layout_factory import from_button_rows
 from ..model.drinks import Drink
-from ..model.layouts import Button, Layout, OrderButton, LinkButton
+from ..model.layouts import Layout
 
 
 class SqliteStore(DataStore):
@@ -43,18 +39,9 @@ class SqliteStore(DataStore):
 
     @staticmethod
     def _add_order_with_random_time_delta(drink: str, conn: sqlite3.Connection):
-        randomized_timestamp = SqliteStore._now_plus_random_milliseconds(1_000)
+        randomized_timestamp = _now_plus_random_milliseconds(1_000)
         sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (?, ?)"
         conn.execute(sql_template, (randomized_timestamp, drink))
-
-    @staticmethod
-    def _now_plus_random_milliseconds(max_diff_millis: int) -> float:
-        random_millis = random.randint(1, max_diff_millis)
-        current_nanos = time.time_ns()
-        current_millis = current_nanos // 1e6
-        updated_millis = current_millis + random_millis
-        updated_sec = updated_millis / 1e3
-        return updated_sec
 
     def get_all_layouts(self) -> dict[str, Layout]:
         with sqlite3.connect(self.path, uri=True) as conn:
