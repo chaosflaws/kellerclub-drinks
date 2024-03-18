@@ -50,7 +50,9 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
     if not _valid_path(path):
         print(f'Invalid path {path}!')
         return ErrorHandler(400, "Invalid path!")
-    if path in {'/', ''}:
+
+    stripped_path = path.rstrip('/')
+    if stripped_path == '':
         if query is None or query == '':
             return DrinkSelector()
 
@@ -59,7 +61,7 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
             return DrinkSelector(params['layout'][0])
         except ValueError as e:
             return ErrorHandler(400, str(e))
-    elif path.startswith('/drinks'):
+    elif stripped_path == '/drinks':
         return DrinkList()
     elif path.endswith('.css'):
         return StaticHandler(path, 'text/css')
