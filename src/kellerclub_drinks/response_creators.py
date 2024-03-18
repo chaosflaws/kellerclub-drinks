@@ -1,10 +1,15 @@
 """
 Interface and implementations of response creators.
 """
+
 import json
 from abc import ABC, abstractmethod
-from typing import Any
+from enum import Enum
+from typing import Any, Self
 from wsgiref.types import StartResponse
+
+
+RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
 
 
 _STATUS_MESSAGES = {
@@ -50,42 +55,6 @@ class ErrorCreator(ResponseCreator):
         return [content]
 
 
-class SuccessCreator(ResponseCreator):
-    """Delivers the given content as a successful HTTP response."""
-
-    def __init__(self, content_type: str, content: bytes):
-        self.content_type = content_type
-        self.content = content
-
-    def serve(self, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(200)
-        response_headers = [('Content-type', self.content_type),
-                            ('Content-Length', str(len(self.content)))]
-        start_response(status, response_headers)
-        return [self.content]
-
-
-class HtmlCreator(SuccessCreator):
-    """Serves HTML content as a successful HTTP response."""
-    def __init__(self, content: bytes):
-        super().__init__('text/html; charset=utf-8', content)
-
-
-class AjaxCreator(ResponseCreator):
-    """Serves an ajax response."""
-
-    def __init__(self, status_code: int, response: Any):
-        self.status_code = status_code
-        self.response = json.dumps(response)
-
-    def serve(self, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(self.status_code)
-        response_headers = [('Content-Type', 'application/json'),
-                            ('Content-Length', str(len(self.response)))]
-        start_response(status, response_headers)
-        return [self.response.encode()]
-
-
 class RedirectCreator(ResponseCreator):
     """Serves an HTTP response containing a generic redirect."""
 
@@ -97,3 +66,63 @@ class RedirectCreator(ResponseCreator):
         response_headers = [('Location', self.new_path)]
         start_response(status, response_headers)
         return []
+
+
+class CustomContentCreator(ResponseCreator, ABC):
+    """Response creator with a non-empty response body that is supplied by a handler."""
+
+    _content: bytes
+
+    def with_content(self, content: bytes) -> Self:
+        """Content to be served."""
+
+        self._content = content
+
+        return self
+
+    def serve(self, start_response: StartResponse) -> list[bytes]:
+        if self._content is None:
+            raise ValueError("Response creator expected content!")
+
+        return self._serve(start_response)
+
+    @abstractmethod
+    def _serve(self, start_response: StartResponse) -> list[bytes]:
+        pass
+
+
+class SuccessCreator(CustomContentCreator):
+    """Delivers the given content as a successful HTTP response."""
+
+    def __init__(self, content_type: str):
+        self.content_type = content_type
+
+    def _serve(self, start_response: StartResponse) -> list[bytes]:
+        status = _get_status_string(200)
+        response_headers = [('Content-type', self.content_type),
+                            ('Content-Length', str(len(self._content)))]
+        start_response(status, response_headers)
+        return [self._content]
+
+
+class HtmlCreator(SuccessCreator):
+    """Serves HTML content as a successful HTTP response."""
+    def __init__(self):
+        super().__init__('text/html; charset=utf-8')
+
+
+class AjaxCreator(CustomContentCreator):
+    """Serves an ajax response."""
+
+    def __init__(self, status_code: int):
+        self.status_code = status_code
+
+    def with_json_content(self, content: Any):
+        self.with_content(json.dumps(content).encode())
+
+    def _serve(self, start_response: StartResponse) -> list[bytes]:
+        status = _get_status_string(self.status_code)
+        response_headers = [('Content-Type', 'application/json'),
+                            ('Content-Length', str(len(self._content)))]
+        start_response(status, response_headers)
+        return [self._content]

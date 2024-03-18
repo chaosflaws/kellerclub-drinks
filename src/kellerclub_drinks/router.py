@@ -1,5 +1,5 @@
 """Methods to deliver an HTTP request to the appropriate handler."""
-
+import json
 import re
 from typing import Optional
 from urllib.parse import parse_qs
@@ -11,6 +11,7 @@ from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
 from .handlers.common_handlers import Handler, ErrorHandler, StaticHandler
 from .model.drinks import Drink
+from .response_creators import RequestSource
 
 
 def route(environ: WSGIEnvironment) -> Handler:
@@ -88,8 +89,9 @@ def _route_post(path: str, content_type: Optional[str], content: bytes):
         try:
             parser = FormParser(order=1)
             parsed_query = parser.parse(content_type or '', content.decode())
-            return AddOrder(parsed_query['order'][0])
+            return AddOrder(parsed_query['order'][0], RequestSource.FORM)
         except ValueError:
+            print(content)
             return ErrorHandler(400)
     elif path == '/add_drink':
         try:
@@ -98,6 +100,17 @@ def _route_post(path: str, content_type: Optional[str], content: bytes):
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]
             return AddDrink(Drink(name, display_name))
+        except ValueError:
+            return ErrorHandler(400)
+    elif path == '/api/add_order':
+        try:
+            parsed_json = json.loads(content.decode())
+            if 'order' not in parsed_json:
+                return ErrorHandler(400)
+            elif not isinstance(parsed_json['order'], str):
+                return ErrorHandler(400)
+            else:
+                return AddOrder(parsed_json['order'], RequestSource.AJAX)
         except ValueError:
             return ErrorHandler(400)
     else:

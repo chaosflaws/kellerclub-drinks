@@ -3,12 +3,9 @@ const buttons = drink_grid.getElementsByTagName('button');
 for (const button of buttons) {
     button.onclick = function (e) {
         e.preventDefault();
-        fetch('/add_order', {
+        fetch('/api/add_order', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: button.name + '=' + button.value
+            body: JSON.stringify({'order': button.value})
         });
     }
 }

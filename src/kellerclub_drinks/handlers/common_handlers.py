@@ -31,7 +31,9 @@ class StaticHandler(Handler):
             file_path = Path(self.request_path.removeprefix('/'))
             with open(f'kellerclub_drinks/handlers/{file_path}', 'rb') as file:
                 content = file.read()
-            return SuccessCreator(self.content_type, content).serve(start_response)
+            return (SuccessCreator(self.content_type)
+                    .with_content(content)
+                    .serve(start_response))
         except OSError:
             return ErrorCreator(404).serve(start_response)
 

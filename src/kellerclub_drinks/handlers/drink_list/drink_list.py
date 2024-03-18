@@ -12,4 +12,4 @@ class DrinkList(Handler):
         drinks = res.datastore.get_all_drinks()
         template = res.jinjaenv.get_template('drink_list/drink_list.jinja2')
         content = template.render(drinks=drinks)
-        return HtmlCreator(content.encode()).serve(start_response)
+        return HtmlCreator().with_content(content.encode()).serve(start_response)
