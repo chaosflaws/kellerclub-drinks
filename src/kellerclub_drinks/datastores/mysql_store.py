@@ -1,4 +1,7 @@
-from mysql.connector import IntegrityError
+from typing import Optional
+
+import mysql.connector
+from mysql.connector import IntegrityError, Error
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 
 from .layout_factory import from_button_rows
@@ -15,6 +18,13 @@ class MysqlStore(DataStore):
                                         user=user,
                                         password=password,
                                         database=db)
+
+    def handle_exception(self, e: Exception) -> Optional[str]:
+        if isinstance(e, Error):
+            print(f"MySQL Error: [{e.errno}, {e.sqlstate}] {e.msg}")
+            return "Some error, consult logs!"
+
+        return None
 
     def get_all_drinks(self) -> dict[str, Drink]:
         with self.pool.get_connection() as conn:

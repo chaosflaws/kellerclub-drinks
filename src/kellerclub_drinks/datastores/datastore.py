@@ -5,6 +5,7 @@ from __future__ import annotations
 import random
 import time
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from ..model.drinks import Drink
 from ..model.layouts import Layout
@@ -12,6 +13,13 @@ from ..model.layouts import Layout
 
 class DataStore(ABC):
     """A resource that provides persistence functionality for the application."""
+
+    @abstractmethod
+    def handle_exception(self, e: Exception) -> Optional[str]:
+        """
+        Catches all exceptions that could be thrown by the datastore and prints
+        a meaningful error message.
+        """
 
     @abstractmethod
     def get_all_drinks(self) -> dict[str, Drink]:

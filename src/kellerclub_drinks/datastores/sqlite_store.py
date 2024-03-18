@@ -1,6 +1,7 @@
 import sqlite3
 from pathlib import Path
-from sqlite3 import IntegrityError
+from sqlite3 import IntegrityError, Error
+from typing import Optional
 
 from .datastore import DataStore, _now_plus_random_milliseconds
 from .layout_factory import from_button_rows
@@ -13,6 +14,13 @@ class SqliteStore(DataStore):
 
     def __init__(self, path: Path | str):
         self.path = path
+
+    def handle_exception(self, e: Exception) -> Optional[str]:
+        if isinstance(e, Error):
+            print(f"SQLite3 Error: [{e.sqlite_errorcode}] {e.sqlite_errorname}")
+            return "Some error, consult logs!"
+
+        return None
 
     def get_all_drinks(self) -> dict[str, Drink]:
         with sqlite3.connect(self.path, uri=True) as conn:
