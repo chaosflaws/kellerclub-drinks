@@ -132,10 +132,10 @@ class FormParser:
         if len(payload) != len(self.valid_params):
             raise ValueError('Argument list has wrong length!')
 
-        for param in self.valid_params:
+        for param, count in self.valid_params.items():
             if param not in payload:
                 raise ValueError(f'Param {param} not valid!')
-            if len(payload[param]) != self.valid_params[param]:
+            if len(payload[param]) != count:
                 raise ValueError(f'Param {param} has wrong number of values!')
 
         return payload
