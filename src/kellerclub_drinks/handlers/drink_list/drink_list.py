@@ -1,15 +1,16 @@
 from wsgiref.types import StartResponse
 
-from kellerclub_drinks.handlers.common_handlers import Handler
-from kellerclub_drinks.resources import Resources
-from kellerclub_drinks.response_creators import HtmlCreator
+from ..errors.error import ResistantHandler
+from ...resources import Resources
+from ...response_creators import HtmlCreator
+from ...templates import render_template
 
 
-class DrinkList(Handler):
+class DrinkList(ResistantHandler):
     """Returns the drinks currently available in the application."""
 
-    def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
-        drinks = res.datastore.get_all_drinks()
-        template = res.jinjaenv.get_template('drink_list/drink_list.jinja2')
-        content = template.render(drinks=drinks)
+    def _handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
+        content = render_template(res.jinjaenv,
+                                  'drink_list/drink_list.jinja2',
+                                  drinks=res.datastore.get_all_drinks())
         return HtmlCreator().with_content(content.encode()).serve(start_response)

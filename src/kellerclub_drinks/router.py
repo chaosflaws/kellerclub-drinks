@@ -10,7 +10,8 @@ from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
 from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
-from .handlers.common_handlers import Handler, StaticHandler
+from .handlers.common_handlers import StaticHandler
+from .handlers.handler import Handler
 from .model.drinks import Drink
 from .response_creators import RequestSource
 
