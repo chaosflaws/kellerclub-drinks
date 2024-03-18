@@ -51,29 +51,19 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
         print(f'Invalid path {path}!')
         return ErrorHandler(400, "Invalid path!")
     if path in {'/', ''}:
-        payload = parse_qs(query)
-
-        if not payload:
+        if query is None or query == '':
             return DrinkSelector()
 
-        if 'layout' not in payload:
-            return ErrorHandler(400, "No layout given!")
-
-        if len(payload['layout']) != 1:
-            return ErrorHandler(400, "Must specify exactly one layout!")
-
-        if not _valid_layout(payload['layout'][0]):
-            return ErrorHandler(400,
-                                f"{payload['layout'][0]} is not a valid layout name!")
-
-        return DrinkSelector(payload['layout'][0])
+        try:
+            params = FormParser(layout=1).parse(query or '')
+            return DrinkSelector(params['layout'][0])
+        except ValueError as e:
+            return ErrorHandler(400, str(e))
     elif path.startswith('/drinks'):
         return DrinkList()
     elif path.endswith('.css'):
         return StaticHandler(path, 'text/css')
-    elif path.endswith('.js'):
-        return StaticHandler(path, 'text/javascript')
-    elif path.endswith('.mjs'):
+    elif path.endswith('.js') or path.endswith('.mjs'):
         return StaticHandler(path, 'text/javascript')
     else:
         return ErrorHandler(404, f"Unknown GET route {path}!")
@@ -91,14 +81,14 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
     if path == '/add_order':
         try:
             parser = FormParser(order=1)
-            parsed_query = parser.parse(content_type or '', content.decode())
+            parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0], RequestSource.FORM)
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif path == '/add_drink':
         try:
             parser = FormParser(drink=1, display_name=1)
-            parsed_query = parser.parse(content_type or '', content.decode())
+            parsed_query = parser.parse(content.decode(), content_type=content_type)
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]
             return AddDrink(Drink(name, display_name))
@@ -125,8 +115,8 @@ class FormParser:
     def __init__(self, **valid_params: int):
         self.valid_params = valid_params
 
-    def parse(self, content_type: str, query: str) -> dict[str, list[str]]:
-        if content_type != 'application/x-www-form-urlencoded':
+    def parse(self, query: str, /, content_type: Optional[str] = None) -> dict[str, list[str]]:
+        if content_type not in [None, 'application/x-www-form-urlencoded']:
             raise ValueError('Wrong Content Type!')
 
         payload = parse_qs(query)
