@@ -118,6 +118,11 @@ class AjaxCreator(CustomContentCreator):
         self.status_code = status_code
 
     def with_json_content(self, content: Any):
+        """
+        Encode the content object as a json string and set it as the response
+        content.
+        """
+
         self.with_content(json.dumps(content).encode())
 
     def _serve(self, start_response: StartResponse) -> list[bytes]:

@@ -8,6 +8,8 @@ from ..model.layouts import Layout
 
 
 class MysqlStore(DataStore):
+    """A datastore using a MySQL database."""
+
     def __init__(self, host: str, user: str, password: str, db: str):
         self.pool = MySQLConnectionPool(host=host,
                                         user=user,

@@ -33,18 +33,18 @@ class Button(ABC):
     @property
     @abstractmethod
     def is_order_button(self):
-        pass
+        """True if the button records an order, false otherwise."""
 
     @property
     @abstractmethod
     def is_link(self):
-        pass
+        """True if the button links to another layout, false otherwise."""
 
 
 @dataclass(frozen=True)
 class OrderButton(Button):
     """A button that records a purchase when clicked."""
-    
+
     drink_name: str
 
     @property

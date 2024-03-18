@@ -118,6 +118,8 @@ def _route_post(path: str, content_type: Optional[str], content: bytes):
 
 
 class FormParser:
+    """Parser for a query string formatted as HTML form data."""
+
     def __init__(self, **valid_params: int):
         self.valid_params = valid_params
 
