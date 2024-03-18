@@ -46,16 +46,3 @@ class RedirectHandler(Handler):
 
     def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
         return RedirectCreator(self.new_path).serve(start_response)
-
-
-class ErrorHandler(Handler):
-    """
-    A handler that serves a generic error message according to the selected
-    status code.
-    """
-
-    def __init__(self, status_code: int):
-        self.status_code = status_code
-
-    def handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
-        return ErrorCreator(self.status_code).serve(start_response)

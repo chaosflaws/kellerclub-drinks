@@ -35,26 +35,6 @@ class ResponseCreator(ABC):
         """
 
 
-class ErrorCreator(ResponseCreator):
-    """
-    Serves an error page for the given status code, if that status code is
-    registered. Otherwise, sends a generic code 400 error message.
-    """
-
-    def __init__(self, status_code: int):
-        self.status_code = status_code if 400 <= status_code < 500 else 400
-
-    def serve(self, start_response: StartResponse) -> list[bytes]:
-        with open(f'./kellerclub_drinks/{self.status_code}.html', 'rb') as error_file:
-            content = error_file.read()
-
-        status = _get_status_string(self.status_code)
-        response_headers = [('Content-type', 'text/html; charset=utf-8'),
-                            ('Content-Length', str(len(content)))]
-        start_response(status, response_headers)
-        return [content]
-
-
 class RedirectCreator(ResponseCreator):
     """Serves an HTTP response containing a generic redirect."""
 
@@ -89,6 +69,23 @@ class CustomContentCreator(ResponseCreator, ABC):
     @abstractmethod
     def _serve(self, start_response: StartResponse) -> list[bytes]:
         pass
+
+
+class ErrorCreator(CustomContentCreator):
+    """
+    Serves an error page for the given status code, if that status code is
+    registered. Otherwise, sends a generic code 400 error message.
+    """
+
+    def __init__(self, status_code: int):
+        self.status_code = status_code if 400 <= status_code < 500 else 400
+
+    def _serve(self, start_response: StartResponse) -> list[bytes]:
+        status = _get_status_string(self.status_code)
+        response_headers = [('Content-type', 'text/html; charset=utf-8'),
+                            ('Content-Length', str(len(self._content)))]
+        start_response(status, response_headers)
+        return [self._content]
 
 
 class SuccessCreator(CustomContentCreator):

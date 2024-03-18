@@ -5,11 +5,12 @@ from typing import Optional
 from urllib.parse import parse_qs
 from wsgiref.types import WSGIEnvironment
 
+from .handlers.errors.error import ErrorHandler
 from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
 from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
-from .handlers.common_handlers import Handler, ErrorHandler, StaticHandler
+from .handlers.common_handlers import Handler, StaticHandler
 from .model.drinks import Drink
 from .response_creators import RequestSource
 
@@ -28,7 +29,7 @@ def route(environ: WSGIEnvironment) -> Handler:
     elif method.lower() == 'post':
         return _route_post(path, content_type, content)
     else:
-        return ErrorHandler(400)
+        return ErrorHandler(400, 'Unsupported HTTP method!')
 
 
 def _get_content(environ: WSGIEnvironment):
@@ -47,7 +48,7 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
     # catch the funky stuff
     if not _valid_path(path):
         print(f'Invalid path {path}!')
-        return ErrorHandler(400)
+        return ErrorHandler(400, "Invalid path!")
     if path in {'/', ''}:
         payload = parse_qs(query)
 
@@ -55,13 +56,14 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
             return DrinkSelector()
 
         if 'layout' not in payload:
-            return ErrorHandler(400)
+            return ErrorHandler(400, "No layout given!")
 
         if len(payload['layout']) != 1:
-            return ErrorHandler(400)
+            return ErrorHandler(400, "Must specify exactly one layout!")
 
         if not _valid_layout(payload['layout'][0]):
-            return ErrorHandler(400)
+            return ErrorHandler(400,
+                                f"{payload['layout'][0]} is not a valid layout name!")
 
         return DrinkSelector(payload['layout'][0])
     elif path.startswith('/drinks'):
@@ -73,7 +75,7 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
     elif path.endswith('.mjs'):
         return StaticHandler(path, 'text/javascript')
     else:
-        return ErrorHandler(404)
+        return ErrorHandler(404, f"Unknown GET route {path}!")
 
 
 def _valid_path(path: str) -> bool:
@@ -90,8 +92,8 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             parser = FormParser(order=1)
             parsed_query = parser.parse(content_type or '', content.decode())
             return AddOrder(parsed_query['order'][0], RequestSource.FORM)
-        except ValueError:
-            return ErrorHandler(400)
+        except ValueError as e:
+            return ErrorHandler(400, str(e))
     elif path == '/add_drink':
         try:
             parser = FormParser(drink=1, display_name=1)
@@ -99,21 +101,21 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]
             return AddDrink(Drink(name, display_name))
-        except ValueError:
-            return ErrorHandler(400)
+        except ValueError as e:
+            return ErrorHandler(400, str(e))
     elif path == '/api/add_order':
         try:
             parsed_json = json.loads(content.decode())
             if 'order' not in parsed_json:
-                return ErrorHandler(400)
+                return ErrorHandler(400, "Key 'order' not present!")
             elif not isinstance(parsed_json['order'], str):
-                return ErrorHandler(400)
+                return ErrorHandler(400, "'order' is not a string!")
             else:
                 return AddOrder(parsed_json['order'], RequestSource.AJAX)
         except ValueError:
-            return ErrorHandler(400)
+            return ErrorHandler(400, f"Malformed JSON {content.decode()}!")
     else:
-        return ErrorHandler(400)
+        return ErrorHandler(400, f"Unknown POST route {path}!")
 
 
 class FormParser:
