@@ -43,7 +43,7 @@ def _get_content(environ: WSGIEnvironment):
     return environ['wsgi.input'].read(content_length)
 
 
-def _route_get(path: str, query: Optional[str]):
+def _route_get(path: str, query: Optional[str]) -> Handler:
     # catch the funky stuff
     if not _valid_path(path):
         print(f'Invalid path {path}!')
@@ -84,14 +84,13 @@ def _valid_layout(path: str) -> bool:
     return bool(re.match(r'^[a-zA-Z_]+$', path))
 
 
-def _route_post(path: str, content_type: Optional[str], content: bytes):
+def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handler:
     if path == '/add_order':
         try:
             parser = FormParser(order=1)
             parsed_query = parser.parse(content_type or '', content.decode())
             return AddOrder(parsed_query['order'][0], RequestSource.FORM)
         except ValueError:
-            print(content)
             return ErrorHandler(400)
     elif path == '/add_drink':
         try:
