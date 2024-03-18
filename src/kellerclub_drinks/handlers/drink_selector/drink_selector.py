@@ -17,7 +17,7 @@ class DrinkSelector(ResistantHandler):
     def _handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
         layouts = res.datastore.get_all_layouts()
         if self.layout_name not in layouts:
-            handler = ErrorHandler(404, f"Layout {self.layout_name} not found!")
+            handler = ErrorHandler(404, f"Layout \"{self.layout_name}\" not found!")
             return handler.handle(res, start_response)
 
         content = render_template(res.jinjaenv, SELECTOR_TEMPLATE, layout=layouts[self.layout_name])

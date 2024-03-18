@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Drink</title>
-</head>
-<body>
+{% extends 'base.jinja2' %}
+
+{% block title %}Add Drink{% endblock %}
+
+{% block content %}
 <ul>
     {% for drink in drinks %}
         <li>{{ drink }}</li>
@@ -19,5 +17,4 @@
     </label>
     <button type="submit">Submit</button>
 </form>
-</body>
-</html>
+{% endblock %}
