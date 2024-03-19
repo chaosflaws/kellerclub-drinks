@@ -1,6 +1,6 @@
 {% extends 'base.jinja2' %}
 
-{% block title %}Add Drink{% endblock %}
+{% block title %}Getränk hinzufügen{% endblock %}
 
 {% block content %}
 <ul>
@@ -9,12 +9,12 @@
     {% endfor %}
 </ul>
 <form method="POST" action="/add_drink">
-    <label for="drink">Drink Name
+    <label for="drink">Interner Name
         <input id="drink" name="drink" type="text" autofocus>
     </label>
-    <label for="display-name">Display Name
+    <label for="display-name">Anzeigename
         <input id="display-name" name="display_name" type="text">
     </label>
-    <button type="submit">Submit</button>
+    <button type="submit">Getränk eintragen</button>
 </form>
 {% endblock %}

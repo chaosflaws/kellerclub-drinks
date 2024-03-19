@@ -1,13 +1,13 @@
 {% extends 'base.jinja2' %}
 
-{% block title %}Welcome!{% endblock %}
+{% block title %}Herzlich Willkommen!{% endblock %}
 
 {% block static %}
 <link rel="stylesheet" href="/welcome_screen/welcome_screen.css">
 {% endblock %}
 
 {% block content %}
-<form id="central-form">
+<form id="central-form" method="POST" action="/add_event">
     <label for="window-grates">
         <input type="checkbox" id="window-grates"><span>Sind die Fenstergitter offen?</span>
     </label>
@@ -17,6 +17,6 @@
     <label for="event-name">Veranstaltung:
         <input type="text" id="event-name">
     </label>
-    <button type="submit">test</button>
+    <button type="submit">Veranstaltung beginnen</button>
 </form>
 {% endblock %}
