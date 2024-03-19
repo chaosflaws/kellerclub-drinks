@@ -2,9 +2,9 @@ import unittest
 from dataclasses import dataclass
 
 from kellerclub_drinks.handlers.add_order import AddOrder
-from kellerclub_drinks.handlers.common_handlers import Handler
 from kellerclub_drinks.handlers.drink_list.drink_list import DrinkList
 from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelector
+from kellerclub_drinks.handlers.handler import Handler
 from kellerclub_drinks.router import _route_get, _route_post
 
 
