@@ -3,7 +3,7 @@ body {
     max-width: 1000px;
     height: min(100svh, 800px);
     margin: 0;
-    padding: .5em;
+    padding: .5rem;
 }
 
 form {
@@ -14,7 +14,7 @@ form {
     display: grid;
     height: 100%;
     grid-template: repeat(5, 1fr) / repeat(5, 1fr);
-    gap: 1%;
+    gap: .5rem;
 
     list-style-type: none;
     margin: 0;
@@ -37,5 +37,5 @@ form {
     align-items: center;
 
     background: lightyellow;
-    border-radius: 1em;
+    border-radius: 1rem;
 }
