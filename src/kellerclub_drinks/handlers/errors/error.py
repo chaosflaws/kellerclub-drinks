@@ -15,12 +15,12 @@ class ResistantHandler(Handler):
         try:
             return self._handle(res, start_response)
         except TemplateError as e:
-            print(f"Template Error: {e}")
-            return ErrorHandler(400, "Template Error").handle(res, start_response)
+            print(f'Template Error: {e}')
+            return ErrorHandler(400, 'Template Error').handle(res, start_response)
         except Exception as e:
             # see if datastore can do something about it
             if result := res.datastore.handle_exception(e):
-                return ErrorHandler(400, f"Database Error: {result}").handle(res, start_response)
+                return ErrorHandler(400, f'Database Error: {result}').handle(res, start_response)
 
     @abstractmethod
     def _handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
