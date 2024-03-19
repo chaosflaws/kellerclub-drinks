@@ -91,15 +91,25 @@ class ErrorCreator(CustomContentCreator):
 class SuccessCreator(CustomContentCreator):
     """Delivers the given content as a successful HTTP response."""
 
-    def __init__(self, content_type: str):
+    def __init__(self, content_type: str, cache_control: str = 'no-cache'):
         self.content_type = content_type
+        self.cache_control = cache_control
 
     def _serve(self, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(200)
         response_headers = [('Content-type', self.content_type),
-                            ('Content-Length', str(len(self._content)))]
+                            ('Content-Length', str(len(self._content))),
+                            ('Cache-Control', self.cache_control)]
         start_response(status, response_headers)
         return [self._content]
+
+
+class StaticCreator(SuccessCreator):
+    """Serves static content as cachable content."""
+
+    def __init__(self, content_type: str):
+        # one day = 1s * 60 * 60 * 24
+        super().__init__(content_type, f"max-age={60*60*24}")
 
 
 class HtmlCreator(SuccessCreator):

@@ -3,9 +3,9 @@
 from pathlib import Path
 from wsgiref.types import StartResponse
 
-from .errors.error import ResistantHandler
+from .errors.error import ResistantHandler, ErrorHandler
 from ..resources import Resources
-from ..response_creators import ErrorCreator, SuccessCreator, RedirectCreator
+from ..response_creators import RedirectCreator, StaticCreator
 
 
 class StaticHandler(ResistantHandler):
@@ -20,11 +20,11 @@ class StaticHandler(ResistantHandler):
             file_path = Path(self.request_path.removeprefix('/'))
             with open(f'kellerclub_drinks/handlers/{file_path}', 'rb') as file:
                 content = file.read()
-            return (SuccessCreator(self.content_type)
+            return (StaticCreator(self.content_type)
                     .with_content(content)
                     .serve(start_response))
         except OSError:
-            return ErrorCreator(404).serve(start_response)
+            return ErrorHandler(404, f'Static file "{file_path}" not found!').handle(res, start_response)
 
 
 class RedirectHandler(ResistantHandler):
