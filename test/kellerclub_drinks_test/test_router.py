@@ -5,6 +5,7 @@ from kellerclub_drinks.handlers.add_order import AddOrder
 from kellerclub_drinks.handlers.drink_list.drink_list import DrinkList
 from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelector
 from kellerclub_drinks.handlers.handler import Handler
+from kellerclub_drinks.handlers.welcome_screen.welcome_screen import WelcomeScreen
 from kellerclub_drinks.router import _route_get, _route_post
 
 
@@ -24,7 +25,7 @@ class PostRequest:
 class TestRouter(unittest.TestCase):
     def test_get_routes(self) -> None:
         route_to_handler: dict[GetRequest, type[Handler]] = {
-            GetRequest('/', ''): DrinkSelector,
+            GetRequest('/', ''): WelcomeScreen,
             GetRequest('/drinks', ''): DrinkList
         }
 
