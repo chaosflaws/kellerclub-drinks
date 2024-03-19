@@ -2,5 +2,6 @@
   "datastore": {
     "type": "sqlite",
     "path": "../db.sqlite"
-  }
+  },
+  "cacheAge": 0
 }

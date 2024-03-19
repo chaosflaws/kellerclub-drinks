@@ -8,6 +8,10 @@ from enum import Enum
 from typing import Any, Self
 from wsgiref.types import StartResponse
 
+from kellerclub_drinks.settings import Settings
+
+settings: Settings = Settings.get_settings()
+
 
 RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
 
@@ -108,8 +112,7 @@ class StaticCreator(SuccessCreator):
     """Serves static content as cachable content."""
 
     def __init__(self, content_type: str):
-        # one day = 1s * 60 * 60 * 24
-        super().__init__(content_type, f"max-age={60*60*24}")
+        super().__init__(content_type, f"max-age={settings.cache_age}")
 
 
 class HtmlCreator(SuccessCreator):

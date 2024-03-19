@@ -10,6 +10,7 @@ class Settings:
     """Application settings that can be adjusted in a settings file."""
 
     data_store_settings: dict[str, Any]
+    cache_age: int
 
     @staticmethod
     def get_settings() -> Settings:
@@ -36,4 +37,10 @@ class Settings:
     @staticmethod
     def _parse_settings(settings_json) -> Settings:
         data_store_settings = settings_json['datastore']
-        return Settings(data_store_settings)
+
+        if 'cacheAge' in settings_json:
+            cache_age = max(settings_json['cacheAge'], 0)
+        else:
+            cache_age = 60 * 60 * 24  # one day
+
+        return Settings(data_store_settings, cache_age)
