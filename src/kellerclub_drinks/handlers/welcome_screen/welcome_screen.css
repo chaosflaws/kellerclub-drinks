@@ -1,0 +1,54 @@
+body {
+    box-sizing: border-box;
+    min-height: 100svh;
+    margin: 0;
+    padding: .5rem;
+
+    display: flex;
+    align-items: center;
+}
+
+#central-form {
+    width: fit-content;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: .5rem;
+
+    border-radius: 1rem;
+    background: lightgray;
+
+    font-size: clamp(1rem,  2.5vw + .5rem, 2rem);
+}
+
+#central-form label {
+    margin: 1rem 0;
+
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#central-form span {
+    flex: 1 0 10ch;
+}
+
+#central-form [type=checkbox] {
+    flex: 0 0 .8em;
+
+    width: .8em;
+    height: .8em;
+
+    font-size: inherit;
+}
+
+#central-form [type=text] {
+    flex: 1 0 20ch;
+    font-size: inherit;
+}
+
+#central-form [type=submit] {
+    width: 100%;
+
+    font-size: inherit;
+}

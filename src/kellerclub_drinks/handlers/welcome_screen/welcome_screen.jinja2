@@ -1,0 +1,22 @@
+{% extends 'base.jinja2' %}
+
+{% block title %}Welcome!{% endblock %}
+
+{% block static %}
+<link rel="stylesheet" href="/welcome_screen/welcome_screen.css">
+{% endblock %}
+
+{% block content %}
+<form id="central-form">
+    <label for="window-grates">
+        <input type="checkbox" id="window-grates"><span>Sind die Fenstergitter offen?</span>
+    </label>
+    <label for="outdoor-lights">
+        <input type="checkbox" id="outdoor-lights"><span>Sind Außenlicht und Außenwerbung eingeschaltet?</span>
+    </label>
+    <label for="event-name">Veranstaltung:
+        <input type="text" id="event-name">
+    </label>
+    <button type="submit">test</button>
+</form>
+{% endblock %}

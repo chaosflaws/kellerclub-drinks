@@ -12,6 +12,7 @@ from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
 from .handlers.common_handlers import StaticHandler
 from .handlers.handler import Handler
+from .handlers.welcome_screen.welcome_screen import WelcomeScreen
 from .model.drinks import Drink
 from .response_creators import RequestSource
 
@@ -53,6 +54,8 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
 
     stripped_path = path.rstrip('/')
     if stripped_path == '':
+        return WelcomeScreen()
+    if stripped_path == '/selector':
         if query is None or query == '':
             return DrinkSelector()
 

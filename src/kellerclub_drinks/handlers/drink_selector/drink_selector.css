@@ -11,8 +11,9 @@ form {
 }
 
 #drink-grid {
-    display: grid;
     height: 100%;
+
+    display: grid;
     grid-template: repeat(5, 1fr) / repeat(5, 1fr);
     gap: .5rem;
 
