@@ -12,4 +12,5 @@ class Resources:
         self.datastore: DataStore = datastore_factory.from_settings(settings.data_store_settings)
         self.jinjaenv = Environment(loader=FileSystemLoader("kellerclub_drinks/handlers"),
                                     autoescape=True,
+                                    trim_blocks=True,
                                     undefined=StrictUndefined)

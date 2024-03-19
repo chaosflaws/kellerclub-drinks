@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="/base.css">
-  {% block static %}{% endblock %}
+  {% filter indent(width=2) %}{% block static %}{% endblock %}{% endfilter %}
 </head>
 
 <body>
