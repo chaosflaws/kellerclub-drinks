@@ -10,4 +10,5 @@ res: Resources = Resources(settings)
 
 def application(environ: WSGIEnvironment, start_response: StartResponse) -> list[bytes]:
     handler = route(environ)
-    return handler.handle(res, start_response)
+    response_creator = handler.handle(res)
+    return response_creator.serve(settings, start_response)

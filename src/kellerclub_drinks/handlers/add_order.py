@@ -1,8 +1,7 @@
-from wsgiref.types import StartResponse
-
 from .errors.error import ResistantHandler
 from ..resources import Resources
-from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, ErrorCreator
+from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, ErrorCreator, \
+    ResponseCreator
 
 
 class AddOrder(ResistantHandler):
@@ -12,13 +11,13 @@ class AddOrder(ResistantHandler):
         self.drink_name = drink_name
         self.source = source
 
-    def _handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
+    def _handle(self, res: Resources) -> ResponseCreator:
         res.datastore.add_order(self.drink_name)
 
         match self.source:
             case RequestSource.FORM:
-                return RedirectCreator('/').serve(start_response)
+                return RedirectCreator('/')
             case RequestSource.AJAX:
-                return AjaxCreator(200).with_content(b'').serve(start_response)
+                return AjaxCreator(200).with_content(b'')
             case _:
-                return ErrorCreator(400).serve(start_response)
+                return ErrorCreator(400)

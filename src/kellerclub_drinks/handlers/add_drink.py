@@ -1,9 +1,7 @@
-from wsgiref.types import StartResponse
-
 from ..handlers.errors.error import ResistantHandler
 from ..model.drinks import Drink
 from ..resources import Resources
-from ..response_creators import RedirectCreator
+from ..response_creators import RedirectCreator, ResponseCreator
 
 
 class AddDrink(ResistantHandler):
@@ -12,6 +10,6 @@ class AddDrink(ResistantHandler):
     def __init__(self, drink: Drink):
         self.drink = drink
 
-    def _handle(self, res: Resources, start_response: StartResponse) -> list[bytes]:
+    def _handle(self, res: Resources) -> ResponseCreator:
         res.datastore.add_drink(self.drink)
-        return RedirectCreator('/drinks').serve(start_response)
+        return RedirectCreator('/drinks')

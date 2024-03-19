@@ -10,9 +10,6 @@ from wsgiref.types import StartResponse
 
 from kellerclub_drinks.settings import Settings
 
-settings: Settings = Settings.get_settings()
-
-
 RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
 
 
@@ -32,7 +29,7 @@ class ResponseCreator(ABC):
     """Sends a response back to the WSGI server."""
 
     @abstractmethod
-    def serve(self, start_response: StartResponse) -> list[bytes]:
+    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         """
         Sets appropriate headers when calling start_response and returns the
         response body.
@@ -45,7 +42,7 @@ class RedirectCreator(ResponseCreator):
     def __init__(self, new_path: str):
         self.new_path = new_path
 
-    def serve(self, start_response: StartResponse) -> list[bytes]:
+    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(303)
         response_headers = [('Location', self.new_path)]
         start_response(status, response_headers)
@@ -64,14 +61,14 @@ class CustomContentCreator(ResponseCreator, ABC):
 
         return self
 
-    def serve(self, start_response: StartResponse) -> list[bytes]:
+    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         if self._content is None:
             raise ValueError("Response creator expected content!")
 
-        return self._serve(start_response)
+        return self._serve(settings, start_response)
 
     @abstractmethod
-    def _serve(self, start_response: StartResponse) -> list[bytes]:
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         pass
 
 
@@ -84,7 +81,7 @@ class ErrorCreator(CustomContentCreator):
     def __init__(self, status_code: int):
         self.status_code = status_code if 400 <= status_code < 500 else 400
 
-    def _serve(self, start_response: StartResponse) -> list[bytes]:
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(self.status_code)
         response_headers = [('Content-type', 'text/html; charset=utf-8'),
                             ('Content-Length', str(len(self._content)))]
@@ -95,15 +92,16 @@ class ErrorCreator(CustomContentCreator):
 class SuccessCreator(CustomContentCreator):
     """Delivers the given content as a successful HTTP response."""
 
-    def __init__(self, content_type: str, cache_control: str = 'no-cache'):
+    def __init__(self, content_type: str, use_cache: bool):
         self.content_type = content_type
-        self.cache_control = cache_control
+        self.use_cache = use_cache
 
-    def _serve(self, start_response: StartResponse) -> list[bytes]:
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(200)
+        cache_control = str(settings.cache_age) if self.use_cache else 'no-cache'
         response_headers = [('Content-type', self.content_type),
                             ('Content-Length', str(len(self._content))),
-                            ('Cache-Control', self.cache_control)]
+                            ('Cache-Control', cache_control)]
         start_response(status, response_headers)
         return [self._content]
 
@@ -112,13 +110,13 @@ class StaticCreator(SuccessCreator):
     """Serves static content as cachable content."""
 
     def __init__(self, content_type: str):
-        super().__init__(content_type, f"max-age={settings.cache_age}")
+        super().__init__(content_type, True)
 
 
 class HtmlCreator(SuccessCreator):
     """Serves HTML content as a successful HTTP response."""
     def __init__(self):
-        super().__init__('text/html; charset=utf-8')
+        super().__init__('text/html; charset=utf-8', False)
 
 
 class AjaxCreator(CustomContentCreator):
@@ -135,7 +133,7 @@ class AjaxCreator(CustomContentCreator):
 
         self.with_content(json.dumps(content).encode())
 
-    def _serve(self, start_response: StartResponse) -> list[bytes]:
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(self.status_code)
         response_headers = [('Content-Type', 'application/json'),
                             ('Content-Length', str(len(self._content)))]
