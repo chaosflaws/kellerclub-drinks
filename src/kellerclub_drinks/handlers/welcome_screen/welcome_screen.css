@@ -8,7 +8,7 @@ body {
     align-items: center;
 }
 
-#central-form {
+#central-container {
     width: fit-content;
     max-width: 800px;
     margin: 0 auto;
@@ -20,7 +20,7 @@ body {
     font-size: clamp(1rem,  2.5vw + .5rem, 2rem);
 }
 
-#central-form label {
+#central-container label {
     margin: 1rem 0;
 
     display: flex;
@@ -29,11 +29,11 @@ body {
     align-items: center;
 }
 
-#central-form span {
+#central-container span {
     flex: 1 0 10ch;
 }
 
-#central-form [type=checkbox] {
+#central-container [type=checkbox] {
     flex: 0 0 .8em;
 
     width: .8em;
@@ -42,12 +42,12 @@ body {
     font-size: inherit;
 }
 
-#central-form [type=text] {
+#central-container [type=text] {
     flex: 1 0 20ch;
     font-size: inherit;
 }
 
-#central-form [type=submit] {
+#central-container [type=submit] {
     width: 100%;
 
     font-size: inherit;
