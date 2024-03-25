@@ -12,6 +12,7 @@ from .handlers.add_order import AddOrder
 from .handlers.drink_selector.drink_selector import DrinkSelector
 from .handlers.common_handlers import StaticHandler
 from .handlers.handler import Handler
+from .handlers.start_event import StartEvent
 from .handlers.welcome_screen.welcome_screen import WelcomeScreen
 from .model.drinks import Drink
 from .response_creators import RequestSource
@@ -99,6 +100,8 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             return AddDrink(Drink(name, display_name))
         except ValueError as e:
             return ErrorHandler(400, str(e))
+    elif path == '/start_event':
+        return StartEvent()
     elif path == '/api/add_order':
         try:
             parsed_json = json.loads(content.decode())
