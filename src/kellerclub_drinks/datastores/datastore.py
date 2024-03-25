@@ -5,6 +5,7 @@ from __future__ import annotations
 import random
 import time
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Optional
 
 from ..model.drinks import Drink
@@ -33,6 +34,14 @@ class DataStore(ABC):
         """
         Adds the drink with the given name to the list of drinks the application
         can process.
+        """
+
+    @abstractmethod
+    def start_event(self, start_time: Optional[datetime] = None,
+                    name: Optional[str] = None) -> None:
+        """Starts a new event.
+
+        Raises a ValueError if another event is still running.
         """
 
     @abstractmethod

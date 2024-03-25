@@ -1,7 +1,9 @@
+import traceback
+from datetime import datetime
 from typing import Optional
 
-import mysql.connector
 from mysql.connector import IntegrityError, Error
+from mysql.connector.cursor import MySQLCursor
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 
 from .layout_factory import from_button_rows
@@ -22,26 +24,49 @@ class MysqlStore(DataStore):
     def handle_exception(self, e: Exception) -> Optional[str]:
         if isinstance(e, Error):
             print(f"MySQL Error: [{e.errno}, {e.sqlstate}] {e.msg}")
+            traceback.print_exc()
             return "Some error, consult logs!"
 
         return None
 
     def get_all_drinks(self) -> dict[str, Drink]:
         with self.pool.get_connection() as conn:
-            cursor = conn.cursor()
+            cursor: MySQLCursor = conn.cursor()
             cursor.execute("SELECT name, display_name FROM Drink")
             return {row[0]: Drink(row[0], row[1]) for row in cursor}
 
     def add_drink(self, drink: Drink) -> None:
         with self.pool.get_connection() as conn:
-            cursor = conn.cursor()
+            cursor: MySQLCursor = conn.cursor()
             sql_template = "INSERT INTO Drink(name, display_name) VALUES (%s, %s)"
             cursor.execute(sql_template, (drink.name, drink.display_name))
             conn.commit()
 
+    def start_event(self, start_time: Optional[datetime] = None,
+                    name: Optional[str] = None) -> None:
+        with self.pool.get_connection() as conn:
+            cursor: MySQLCursor = conn.cursor()
+            if self._has_unfinished_events(conn):
+                raise ValueError("At least one event is still running!")
+
+            insert_template = "INSERT INTO Event(start_time, name) VALUES (%s, %s)"
+            cursor.execute(insert_template, (start_time, name))
+
+            conn.commit()
+
+    @staticmethod
+    def _has_unfinished_events(conn: PooledMySQLConnection) -> bool:
+        cursor: MySQLCursor = conn.cursor()
+        cursor.execute(MysqlStore.any_unfinished_events_template)
+        return next(cursor)[0] == 1
+
+    any_unfinished_events_template = """
+SELECT EXISTS (SELECT 1 FROM Event WHERE end_time IS NULL)
+"""
+
     def add_order(self, drink: str) -> None:
         with self.pool.get_connection() as conn:
-            cursor = conn.cursor()
+            cursor: MySQLCursor = conn.cursor()
             try:
                 sql_template = "INSERT INTO PurchaseOrder(drink_name) VALUES (%s)"
                 cursor.execute(sql_template, (drink,))
@@ -62,7 +87,7 @@ class MysqlStore(DataStore):
 
     def get_all_layouts(self) -> dict[str, Layout]:
         with self.pool.get_connection() as conn:
-            cursor = conn.cursor()
+            cursor: MySQLCursor = conn.cursor()
             cursor.execute(self._get_all_order_buttons_template)
             order_rows = list(cursor)
             cursor.execute(self._get_all_link_buttons_template)

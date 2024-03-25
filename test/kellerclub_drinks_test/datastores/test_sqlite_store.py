@@ -76,6 +76,13 @@ class TestSqliteStore(unittest.TestCase):
 
         self.assertEqual(display_name, layouts[layout_name].buttons[0][0].display_name)
 
+    def test_start_event__unfinished_event_exists__raises(self):
+        with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
+            db.execute("INSERT INTO Event DEFAULT VALUES")
+        store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
+
+        self.assertRaises(ValueError, store.start_event)
+
     @staticmethod
     def _add_layout(conn: sqlite3.Connection, name: str) -> None:
         insert_layout_template = "INSERT INTO SelectorLayout(name) VALUES (?)"
