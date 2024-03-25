@@ -6,9 +6,7 @@ CREATE TABLE Drink (
 );
 
 CREATE TABLE PurchaseOrder (
-                               -- replace with unixepoch('subsec') when sqlite3
-                               -- version >= 3.38
-    time REAL NOT NULL DEFAULT((julianday('now') - 2440587.5)*86400.0) PRIMARY KEY,
+    time REAL NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
     drink_name TEXT NOT NULL
         REFERENCES Drink(name)
 );
