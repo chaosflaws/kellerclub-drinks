@@ -5,6 +5,12 @@ CREATE TABLE Drink (
     display_name TEXT NOT NULL
 );
 
+CREATE TABLE Event (
+    start_time INTEGER NOT NULL DEFAULT(unixepoch()) PRIMARY KEY,
+    end_time INTEGER,
+    name TEXT
+);
+
 CREATE TABLE PurchaseOrder (
     time REAL NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
     drink_name TEXT NOT NULL
