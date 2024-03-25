@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 from ..model.drinks import Drink
+from ..model.events import Event
 from ..model.layouts import Layout
 
 
@@ -43,6 +44,10 @@ class DataStore(ABC):
 
         Raises a ValueError if another event is still running.
         """
+
+    @abstractmethod
+    def current_event(self) -> Optional[Event]:
+        """Returns the current event, if there is one, and None otherwise."""
 
     @abstractmethod
     def add_order(self, drink: str) -> None:

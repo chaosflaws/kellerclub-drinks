@@ -9,6 +9,7 @@ from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from .layout_factory import from_button_rows
 from ..datastores.datastore import DataStore, _now_plus_random_milliseconds
 from ..model.drinks import Drink
+from ..model.events import Event
 from ..model.layouts import Layout
 
 
@@ -46,7 +47,7 @@ class MysqlStore(DataStore):
                     name: Optional[str] = None) -> None:
         with self.pool.get_connection() as conn:
             cursor: MySQLCursor = conn.cursor()
-            if self._has_unfinished_events(conn):
+            if self._current_event(conn):
                 raise ValueError("At least one event is still running!")
 
             insert_template = "INSERT INTO Event(start_time, name) VALUES (%s, %s)"
@@ -54,14 +55,22 @@ class MysqlStore(DataStore):
 
             conn.commit()
 
+    def current_event(self) -> Optional[Event]:
+        with self.pool.get_connection() as conn:
+            result = self._current_event(conn)
+            if result:
+                return Event(result[1], result[0], None)
+            else:
+                return None
+
     @staticmethod
-    def _has_unfinished_events(conn: PooledMySQLConnection) -> bool:
+    def _current_event(conn: PooledMySQLConnection) -> tuple[datetime, Optional[str]]:
         cursor: MySQLCursor = conn.cursor()
         cursor.execute(MysqlStore.any_unfinished_events_template)
-        return next(cursor)[0] == 1
+        return cursor.fetchone()
 
     any_unfinished_events_template = """
-SELECT EXISTS (SELECT 1 FROM Event WHERE end_time IS NULL)
+SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
     def add_order(self, drink: str) -> None:

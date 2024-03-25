@@ -7,6 +7,7 @@ from typing import Optional
 from .datastore import DataStore, _now_plus_random_milliseconds
 from .layout_factory import from_button_rows
 from ..model.drinks import Drink
+from ..model.events import Event
 from ..model.layouts import Layout
 
 
@@ -43,7 +44,7 @@ class SqliteStore(DataStore):
 
             conn.execute("BEGIN")
 
-            if conn.execute(self.any_unfinished_events_template).fetchone()[0] == 1:
+            if self._current_event(conn):
                 raise ValueError("At least one event is still running!")
 
             if start_time:
@@ -55,8 +56,22 @@ class SqliteStore(DataStore):
 
             conn.commit()
 
-    any_unfinished_events_template = """
-SELECT EXISTS (SELECT 1 FROM Event WHERE end_time IS NULL)
+    def current_event(self) -> Optional[Event]:
+        with connect(self.path, uri=True) as conn:
+            conn.execute("PRAGMA foreign_keys = ON;")
+            result = self._current_event(conn)
+            if result:
+                return Event(result[1], datetime.fromtimestamp(result[0]), None)
+            else:
+                return None
+
+    @staticmethod
+    def _current_event(conn: Connection) -> tuple[int, Optional[str]]:
+        template = SqliteStore._current_event_template
+        return conn.execute(template).fetchone()
+
+    _current_event_template = """
+SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
     def add_order(self, drink: str) -> None:
