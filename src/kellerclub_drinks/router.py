@@ -53,30 +53,41 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
         print(f'Invalid path {path}!')
         return ErrorHandler(400, "Invalid path!")
 
+    # paths without variables
     stripped_path = path.rstrip('/')
     if stripped_path == '':
         return WelcomeScreen()
-    if stripped_path == '/selector':
-        if query is None or query == '':
-            return DrinkSelector()
-
-        try:
-            params = FormParser(layout=1).parse(query or '')
-            return DrinkSelector(params['layout'][0])
-        except ValueError as e:
-            return ErrorHandler(400, str(e))
     elif stripped_path == '/drinks':
         return DrinkList()
-    elif path.endswith('.css'):
+
+    # paths to static files
+    if path.endswith('.css'):
         return StaticHandler(path, 'text/css')
     elif path.endswith('.js') or path.endswith('.mjs'):
         return StaticHandler(path, 'text/javascript')
-    else:
-        return ErrorHandler(404, f"Unknown GET route {path}!")
+
+    # event-related URLs
+    if (parts := path.split('/'))[1] == 'event':
+        if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
+            return _get_drink_selector(query)
+
+    # give up
+    return ErrorHandler(404, f"Unknown GET route {path}!")
+
+
+def _get_drink_selector(query: Optional[str]) -> Handler:
+    if query is None or query == '':
+        return DrinkSelector()
+
+    try:
+        params = FormParser(layout=1).parse(query or '')
+        return DrinkSelector(params['layout'][0])
+    except ValueError as e:
+        return ErrorHandler(400, str(e))
 
 
 def _valid_path(path: str) -> bool:
-    return bool(re.match(r'^[a-zA-Z/_]*(\.[a-z]+)?$', path))
+    return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z]+)?$', path))
 
 
 def _valid_layout(path: str) -> bool:

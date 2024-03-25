@@ -15,7 +15,7 @@
 {% block content %}
 <div id="central-container">
     <p>Beginn: {{ '{start.day}. {start:%B} {start.year}, {start.hour} Uhr'.format(start=event.start_time) }}</p>
-    <form method="GET" action="/selector">
+    <form method="GET" action="/event/{{ event.start_time.timestamp() | int }}/selector">
         <button type="submit">Bestellungen erfassen</button>
     </form>
 </div>
