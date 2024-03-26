@@ -1,4 +1,5 @@
 PRAGMA foreign_keys = ON;
+PRAGMA busy_timeout = 10;
 
 CREATE TABLE Drink (
     name TEXT NOT NULL PRIMARY KEY,
@@ -6,13 +7,13 @@ CREATE TABLE Drink (
 );
 
 CREATE TABLE Event (
-    start_time INTEGER NOT NULL DEFAULT(unixepoch()) PRIMARY KEY,
+    start_time NUMERIC NOT NULL DEFAULT(unixepoch()) PRIMARY KEY,
     end_time INTEGER,
     name TEXT
 );
 
 CREATE TABLE PurchaseOrder (
-    time REAL NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
+    time NUMERIC NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
     drink_name TEXT NOT NULL
         REFERENCES Drink(name)
 );
