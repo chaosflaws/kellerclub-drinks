@@ -29,7 +29,7 @@ class TestSqliteStore(unittest.TestCase):
 
     def test_get_all_drinks__no_drinks__returns_empty_map(self):
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
-        self.assertEqual(0, len(store.get_all_drinks()))
+        self.assertEqual(0, len(store.all_drinks()))
 
     def test_add_order__no_timestamp__uses_current_timestamp(self):
         drink_name = 'tap_beer'
@@ -45,7 +45,7 @@ class TestSqliteStore(unittest.TestCase):
 
     def test_get_all_layouts__no_layouts__returns_empty_map(self):
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
-        self.assertEqual(0, len(store.get_all_layouts()))
+        self.assertEqual(0, len(store.all_layouts()))
 
     def test_get_all_layouts__simple_layout__succeeds(self):
         drink_name = 'tap_beer'
@@ -57,7 +57,7 @@ class TestSqliteStore(unittest.TestCase):
             self._add_layout(db, layout_name)
             self._add_order_button(db, layout_name, 0, 0, drink_name)
 
-        layouts = store.get_all_layouts()
+        layouts = store.all_layouts()
 
         self.assertEqual(1, len(layouts))
         self.assertIsInstance(layouts[layout_name].buttons[0][0], OrderButton)
@@ -72,7 +72,7 @@ class TestSqliteStore(unittest.TestCase):
             self._add_layout(db, layout_name)
             self._add_order_button(db, layout_name, 0, 0, drink_name)
 
-        layouts = store.get_all_layouts()
+        layouts = store.all_layouts()
 
         self.assertEqual(display_name, layouts[layout_name].buttons[0][0].display_name)
 

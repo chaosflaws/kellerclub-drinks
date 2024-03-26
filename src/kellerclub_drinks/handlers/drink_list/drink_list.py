@@ -10,5 +10,5 @@ class DrinkList(ResistantHandler):
     def _handle(self, res: Resources) -> ResponseCreator:
         content = render_template(res.jinjaenv,
                                   'drink_list/drink_list.jinja2',
-                                  drinks=res.datastore.get_all_drinks())
+                                  drinks=res.datastore.all_drinks())
         return HtmlCreator().with_content(content.encode())

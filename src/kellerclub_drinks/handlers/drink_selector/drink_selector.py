@@ -13,7 +13,7 @@ class DrinkSelector(ResistantHandler):
         self.layout_name = layout_name
 
     def _handle(self, res: Resources) -> ResponseCreator:
-        layouts = res.datastore.get_all_layouts()
+        layouts = res.datastore.all_layouts()
         if self.layout_name not in layouts:
             handler = ErrorHandler(404, f'Layout "{self.layout_name}" not found!')
             return handler.handle(res)

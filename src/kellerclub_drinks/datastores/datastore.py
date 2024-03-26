@@ -24,7 +24,7 @@ class DataStore(ABC):
         """
 
     @abstractmethod
-    def get_all_drinks(self) -> dict[str, Drink]:
+    def all_drinks(self) -> dict[str, Drink]:
         """
         Returns a mapping from drink names to drinks for all drinks added to the
         application.
@@ -54,7 +54,7 @@ class DataStore(ABC):
         """Adds an order with the current timestamp to the list of orders."""
 
     @abstractmethod
-    def get_all_layouts(self) -> dict[str, Layout]:
+    def all_layouts(self) -> dict[str, Layout]:
         """Returns all persisted layouts, identified by their names."""
 
 

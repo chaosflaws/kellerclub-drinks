@@ -25,7 +25,7 @@ class SqliteStore(DataStore):
 
         return None
 
-    def get_all_drinks(self) -> dict[str, Drink]:
+    def all_drinks(self) -> dict[str, Drink]:
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
             sql_template = "SELECT name, display_name FROM Drink"
@@ -66,7 +66,7 @@ class SqliteStore(DataStore):
                 return None
 
     @staticmethod
-    def _current_event(conn: Connection) -> tuple[int, Optional[str]]:
+    def _current_event(conn: Connection) -> Optional[tuple[int, Optional[str]]]:
         template = SqliteStore._current_event_template
         return conn.execute(template).fetchone()
 
@@ -91,7 +91,7 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
         sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (?, ?)"
         conn.execute(sql_template, (randomized_timestamp, drink))
 
-    def get_all_layouts(self) -> dict[str, Layout]:
+    def all_layouts(self) -> dict[str, Layout]:
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
 

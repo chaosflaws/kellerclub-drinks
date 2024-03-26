@@ -30,7 +30,7 @@ class MysqlStore(DataStore):
 
         return None
 
-    def get_all_drinks(self) -> dict[str, Drink]:
+    def all_drinks(self) -> dict[str, Drink]:
         with self.pool.get_connection() as conn:
             cursor: MySQLCursor = conn.cursor()
             cursor.execute("SELECT name, display_name FROM Drink")
@@ -64,7 +64,7 @@ class MysqlStore(DataStore):
                 return None
 
     @staticmethod
-    def _current_event(conn: PooledMySQLConnection) -> tuple[datetime, Optional[str]]:
+    def _current_event(conn: PooledMySQLConnection) -> Optional[tuple[datetime, Optional[str]]]:
         cursor: MySQLCursor = conn.cursor()
         cursor.execute(MysqlStore.any_unfinished_events_template)
         return cursor.fetchone()
@@ -94,7 +94,7 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
         cursor.execute(sql_template, (randomized_timestamp, drink))
         conn.commit()
 
-    def get_all_layouts(self) -> dict[str, Layout]:
+    def all_layouts(self) -> dict[str, Layout]:
         with self.pool.get_connection() as conn:
             cursor: MySQLCursor = conn.cursor()
             cursor.execute(self._get_all_order_buttons_template)
