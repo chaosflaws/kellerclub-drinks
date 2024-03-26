@@ -1,3 +1,7 @@
+-- MySQL does not support:
+-- - inline foreign key statements (... REFERENCES ...)
+-- - deferred foreign key constraints
+
 CREATE TABLE Drink (
     name VARCHAR(100) NOT NULL PRIMARY KEY,
     display_name TEXT NOT NULL
