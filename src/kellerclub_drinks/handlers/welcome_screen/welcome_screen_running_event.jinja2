@@ -18,5 +18,8 @@
     <form method="GET" action="/event/{{ event.start_time.timestamp() | int }}/selector">
         <button type="submit">Bestellungen erfassen</button>
     </form>
+    <form method="POST" action="/stop_event">
+        <button type="submit">Veranstaltung beenden</button>
+    </form>
 </div>
 {% endblock %}

@@ -13,6 +13,7 @@ from .handlers.drink_selector.drink_selector import DrinkSelector
 from .handlers.common_handlers import StaticHandler
 from .handlers.handler import Handler
 from .handlers.start_event import StartEvent
+from .handlers.stop_event import StopEvent
 from .handlers.welcome_screen.welcome_screen import WelcomeScreen
 from .model.drinks import Drink
 from .response_creators import RequestSource
@@ -86,23 +87,26 @@ def _get_drink_selector(query: Optional[str]) -> Handler:
         return ErrorHandler(400, str(e))
 
 
-def _valid_path(path: str) -> bool:
-    return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z]+)?$', path))
-
-
 def _valid_layout(path: str) -> bool:
     return bool(re.match(r'^[a-zA-Z_]+$', path))
 
 
 def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handler:
-    if path == '/add_order':
+    # catch the funky stuff
+    if not _valid_path(path):
+        print(f'Invalid path {path}!')
+        return ErrorHandler(400, "Invalid path!")
+
+    # constant paths
+    stripped_path = path.rstrip('/')
+    if stripped_path == '/add_order':
         try:
             parser = FormParser(order=1)
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0], RequestSource.FORM)
         except ValueError as e:
             return ErrorHandler(400, str(e))
-    elif path == '/add_drink':
+    elif stripped_path == '/add_drink':
         try:
             parser = FormParser(drink=1, display_name=1)
             parsed_query = parser.parse(content.decode(), content_type=content_type)
@@ -111,9 +115,13 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             return AddDrink(Drink(name, display_name))
         except ValueError as e:
             return ErrorHandler(400, str(e))
-    elif path == '/start_event':
+    elif stripped_path == '/start_event':
         return StartEvent()
-    elif path == '/api/add_order':
+    elif stripped_path == '/stop_event':
+        return StopEvent()
+
+    # constant API paths
+    if stripped_path == '/api/add_order':
         try:
             parsed_json = json.loads(content.decode())
             if 'order' not in parsed_json:
@@ -124,8 +132,13 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
                 return AddOrder(parsed_json['order'], RequestSource.AJAX)
         except ValueError:
             return ErrorHandler(400, f"Malformed JSON {content.decode()}!")
-    else:
-        return ErrorHandler(400, f"Unknown POST route {path}!")
+
+    # give up
+    return ErrorHandler(400, f"Unknown POST route {path}!")
+
+
+def _valid_path(path: str) -> bool:
+    return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z]+)?$', path))
 
 
 class FormParser:
