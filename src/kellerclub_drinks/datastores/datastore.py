@@ -46,6 +46,18 @@ class DataStore(ABC):
         """
 
     @abstractmethod
+    def stop_current_event(self, end_time: Optional[datetime] = None) -> bool:
+        """Stop the currently running event, if there is one.
+
+        The end time of the event is set to the specified time, or the current
+        time of no end time is supplied.
+
+        Only one event can be running at a given time.
+
+        Returns true if an event has been stopped and returns false otherwise.
+        """
+
+    @abstractmethod
     def current_event(self) -> Optional[Event]:
         """Returns the current event, if there is one, and None otherwise."""
 

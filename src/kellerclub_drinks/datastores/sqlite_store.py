@@ -56,6 +56,18 @@ class SqliteStore(DataStore):
 
             conn.commit()
 
+    def stop_current_event(self, end_time: Optional[datetime] = None) -> bool:
+        with connect(self.path, uri=True) as conn:
+            conn.execute("PRAGMA foreign_keys = ON;")
+            current_event = self._current_event(conn)
+            if current_event:
+                event_id, _ = current_event
+                conn.execute("UPDATE Event SET end_time = ? WHERE start_time = ?",
+                             (end_time or datetime.now(), event_id))
+                return True
+            else:
+                return False
+
     def current_event(self) -> Optional[Event]:
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")

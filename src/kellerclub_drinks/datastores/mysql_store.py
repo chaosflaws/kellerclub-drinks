@@ -55,6 +55,19 @@ class MysqlStore(DataStore):
 
             conn.commit()
 
+    def stop_current_event(self, end_time: Optional[datetime] = None) -> bool:
+        with self.pool.get_connection() as conn:
+            cursor: MySQLCursor = conn.cursor()
+            current_event = self._current_event(conn)
+            if current_event:
+                event_id, _ = current_event
+                cursor.execute("UPDATE Event SET end_time = %s WHERE start_time = %s",
+                               (end_time or datetime.now(), event_id))
+                conn.commit()
+                return True
+            else:
+                return False
+
     def current_event(self) -> Optional[Event]:
         with self.pool.get_connection() as conn:
             result = self._current_event(conn)
