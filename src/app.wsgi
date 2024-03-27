@@ -6,7 +6,7 @@ from kellerclub_drinks.router import route
 from kellerclub_drinks.settings import Settings
 
 
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
 
 
 settings: Settings = Settings.get_settings()
