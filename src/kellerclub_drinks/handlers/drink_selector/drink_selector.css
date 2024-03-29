@@ -1,20 +1,10 @@
-body {
-    box-sizing: border-box;
-    max-width: 1000px;
-    height: min(100svh, 800px);
-    margin: 0;
-    padding: .5rem;
-}
-
-form {
-    height: 100%;
-}
-
 #drink-grid {
+    max-width: 1000px;
     height: 100%;
+    max-height: 800px;
 
     display: grid;
-    grid-template: repeat(5, 1fr) / repeat(5, 1fr);
+    grid: repeat(5, 1fr) / repeat(5, 1fr);
     gap: .5rem;
 
     list-style-type: none;

@@ -1,4 +1,4 @@
-{% extends 'base.jinja2' %}
+{% extends 'layout_with_menu.jinja2' %}
 
 {% block title %}
 {% if event.name %}
@@ -12,12 +12,11 @@
 <link rel="stylesheet" href="/welcome_screen/welcome_screen.css">
 {% endblock %}
 
-{% block content %}
+{% block main_content %}
 <div id="central-container">
+    <p>{{ event.name or 'Veranstaltung' }} läuft!</p>
     <p>Beginn: {{ '{start.day}. {start:%B} {start.year}, {start.hour} Uhr'.format(start=event.start_time) }}</p>
-    <form method="GET" action="/event/{{ event.start_time.timestamp() | int }}/selector">
-        <button type="submit">Bestellungen erfassen</button>
-    </form>
+    <p><a href="/event/{{ event.start_time.timestamp() | int }}/selector">Bestellungen erfassen</a></p>
     <form method="POST" action="/stop_event">
         <button type="submit">Veranstaltung beenden</button>
     </form>

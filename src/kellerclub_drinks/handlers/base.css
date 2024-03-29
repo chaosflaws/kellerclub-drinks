@@ -85,7 +85,42 @@ textarea {
    ========================================================================== */
 
 body {
+  box-sizing: border-box;
+  min-height: 100svh;
+  margin: 0;
+  padding: .5rem;
+
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: .5rem;
+
   font-family: system-ui, sans-serif;
+}
+
+#main-menu {
+  display: grid;
+  align-items: center;
+}
+
+#main-menu ul {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  list-style-type: none;
+}
+
+#main-menu li a {
+  display: block;
+  padding: .5rem;
+  background-color: lightgreen;
+}
+
+#main-menu li a:hover {
+  background-color: lightseagreen;
 }
 
 /* ==========================================================================

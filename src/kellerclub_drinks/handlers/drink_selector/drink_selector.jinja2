@@ -1,4 +1,4 @@
-{% extends 'base.jinja2' %}
+{% extends 'layout_with_menu.jinja2' %}
 
 {% block title %}Getränke-Auswahl{% endblock %}
 
@@ -7,7 +7,7 @@
 <script src="/drink_selector/drink_selector.mjs" defer></script>
 {% endblock %}
 
-{% block content %}
+{% block main_content %}
 <form method="POST" action="/add_order">
     <ul id="drink-grid">
         {% for row in layout.buttons %}

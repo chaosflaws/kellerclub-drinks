@@ -1,14 +1,6 @@
-body {
-    box-sizing: border-box;
-    min-height: 100svh;
-    margin: 0;
-    padding: .5rem;
-
-    display: flex;
-    align-items: center;
-}
-
 #central-container {
+    align-self: center;
+
     width: fit-content;
     max-width: 800px;
     margin: 0 auto;

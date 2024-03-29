@@ -1,20 +1,22 @@
-{% extends 'base.jinja2' %}
+{% extends 'layout_with_menu.jinja2' %}
 
 {% block title %}Getränk hinzufügen{% endblock %}
 
-{% block content %}
-<ul>
-    {% for drink in drinks %}
-        <li>{{ drink }}</li>
-    {% endfor %}
-</ul>
-<form method="POST" action="/add_drink">
-    <label for="drink">Interner Name
-        <input id="drink" name="drink" type="text" autofocus>
-    </label>
-    <label for="display-name">Anzeigename
-        <input id="display-name" name="display_name" type="text">
-    </label>
-    <button type="submit">Getränk eintragen</button>
-</form>
+{% block main_content %}
+<div>
+    <ul>
+        {% for drink in drinks %}
+            <li>{{ drink }}</li>
+        {% endfor %}
+    </ul>
+    <form method="POST" action="/add_drink">
+        <label for="drink">Interner Name
+            <input id="drink" name="drink" type="text" autofocus>
+        </label>
+        <label for="display-name">Anzeigename
+            <input id="display-name" name="display_name" type="text">
+        </label>
+        <button type="submit">Getränk eintragen</button>
+    </form>
+</div>
 {% endblock %}
