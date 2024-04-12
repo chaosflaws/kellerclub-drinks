@@ -10,6 +10,10 @@ class AddDrink(ResistantHandler):
     def __init__(self, drink: Drink):
         self.drink = drink
 
+    @property
+    def canonical_url(self) -> str:
+        return '/add_drink'
+
     def _handle(self, res: Resources) -> ResponseCreator:
         res.datastore.add_drink(self.drink)
         return RedirectCreator('/drinks')

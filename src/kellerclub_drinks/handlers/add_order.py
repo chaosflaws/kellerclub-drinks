@@ -11,6 +11,10 @@ class AddOrder(ResistantHandler):
         self.drink_name = drink_name
         self.source = source
 
+    @property
+    def canonical_url(self) -> str:
+        return '/add_order'
+
     def _handle(self, res: Resources) -> ResponseCreator:
         res.datastore.add_order(self.drink_name)
 

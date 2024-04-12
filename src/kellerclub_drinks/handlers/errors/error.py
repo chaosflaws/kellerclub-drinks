@@ -38,6 +38,10 @@ class ErrorHandler(Handler):
         self.status_code = status_code
         self.message = message
 
+    @property
+    def canonical_url(self) -> str:
+        return f'/{self.status_code}'
+
     def handle(self, res: Resources) -> ResponseCreator:
         try:
             template = res.jinjaenv.get_template(f'errors/{self.status_code}.jinja2')

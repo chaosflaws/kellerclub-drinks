@@ -5,6 +5,10 @@ from ...templates import render_template
 
 
 class WelcomeScreen(ResistantHandler):
+    @property
+    def canonical_url(self) -> str:
+        return '/'
+
     def _handle(self, res: Resources) -> ResponseCreator:
         if event := res.datastore.current_event():
             content = render_template(res.jinjaenv,

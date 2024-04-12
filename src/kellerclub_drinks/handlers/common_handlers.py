@@ -14,6 +14,10 @@ class StaticHandler(ResistantHandler):
         self.request_path = request_path
         self.content_type = content_type
 
+    @property
+    def canonical_url(self) -> str:
+        return self.request_path
+
     def _handle(self, res: Resources) -> ResponseCreator:
         try:
             file_path = Path(self.request_path.removeprefix('/'))
@@ -29,6 +33,10 @@ class RedirectHandler(ResistantHandler):
 
     def __init__(self, new_path: str):
         self.new_path = new_path
+
+    @property
+    def canonical_url(self) -> str:
+        return self.new_path
 
     def _handle(self, res: Resources) -> ResponseCreator:
         return RedirectCreator(self.new_path)

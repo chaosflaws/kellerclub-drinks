@@ -1,7 +1,8 @@
-from kellerclub_drinks.handlers.errors.error import ErrorHandler, ResistantHandler
-from kellerclub_drinks.resources import Resources
-from kellerclub_drinks.response_creators import HtmlCreator, ResponseCreator
-from kellerclub_drinks.templates import render_template
+from ..errors.error import ErrorHandler, ResistantHandler
+from ...model.events import Event
+from ...resources import Resources
+from ...response_creators import HtmlCreator, ResponseCreator
+from ...templates import render_template
 
 SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
 
@@ -9,8 +10,13 @@ SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
 class DrinkSelector(ResistantHandler):
     """Provides an HTML interface to add lots of orders quickly."""
 
-    def __init__(self, layout_name: str = 'default'):
+    def __init__(self, event: Event, layout_name: str = 'default'):
+        self.event = event
         self.layout_name = layout_name
+
+    @property
+    def canonical_url(self) -> str:
+        return f'/event/{self.event}/selector'
 
     def _handle(self, res: Resources) -> ResponseCreator:
         layouts = res.datastore.all_layouts()
