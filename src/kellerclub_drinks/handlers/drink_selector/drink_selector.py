@@ -1,5 +1,4 @@
 from ..errors.error import ErrorHandler, ResistantHandler
-from ...model.events import Event
 from ...resources import Resources
 from ...response_creators import HtmlCreator, ResponseCreator
 from ...templates import render_template
@@ -10,13 +9,13 @@ SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
 class DrinkSelector(ResistantHandler):
     """Provides an HTML interface to add lots of orders quickly."""
 
-    def __init__(self, event: Event, layout_name: str = 'default'):
-        self.event = event
+    def __init__(self, event_id: str, layout_name: str = 'default'):
+        self.event_id = event_id
         self.layout_name = layout_name
 
     @property
     def canonical_url(self) -> str:
-        return f'/event/{self.event}/selector'
+        return f'/event/{self.event_id}/selector'
 
     def _handle(self, res: Resources) -> ResponseCreator:
         layouts = res.datastore.all_layouts()

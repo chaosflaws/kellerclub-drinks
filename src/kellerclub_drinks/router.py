@@ -16,6 +16,7 @@ from .handlers.start_event import StartEvent
 from .handlers.stop_event import StopEvent
 from .handlers.welcome_screen.welcome_screen import WelcomeScreen
 from .model.drinks import Drink
+from .model.events import Event
 from .response_creators import RequestSource
 
 
@@ -72,19 +73,20 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
     # event-related URLs
     if (parts := path.split('/'))[1] == 'event':
         if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
-            return _get_drink_selector(query)
+            event_id = parts[2]
+            return _get_drink_selector(event_id, query)
 
     # give up
     return ErrorHandler(404, f"Unknown GET route {path}!")
 
 
-def _get_drink_selector(query: Optional[str]) -> Handler:
+def _get_drink_selector(event_id: str, query: Optional[str]) -> Handler:
     if query is None or query == '':
-        return DrinkSelector()
+        return DrinkSelector(event_id)
 
     try:
         params = FormParser(layout=1).parse(query or '')
-        return DrinkSelector(params['layout'][0])
+        return DrinkSelector(event_id, params['layout'][0])
     except ValueError as e:
         return ErrorHandler(400, str(e))
 
