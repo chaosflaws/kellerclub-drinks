@@ -14,5 +14,6 @@ class DrinkList(ResistantHandler):
     def _handle(self, res: Resources) -> ResponseCreator:
         content = render_template(res.jinjaenv,
                                   'drink_list/drink_list.jinja2',
+                                  self.canonical_url,
                                   drinks=res.datastore.all_drinks())
         return HtmlCreator().with_content(content.encode())

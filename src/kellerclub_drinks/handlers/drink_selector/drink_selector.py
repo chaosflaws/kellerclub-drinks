@@ -24,5 +24,7 @@ class DrinkSelector(ResistantHandler):
             handler = ErrorHandler(404, f'Layout "{self.layout_name}" not found!')
             return handler.handle(res)
 
-        content = render_template(res.jinjaenv, SELECTOR_TEMPLATE, layout=layouts[self.layout_name])
+        content = render_template(res.jinjaenv, SELECTOR_TEMPLATE,
+                                  self.canonical_url,
+                                  layout=layouts[self.layout_name])
         return HtmlCreator().with_content(content.encode())

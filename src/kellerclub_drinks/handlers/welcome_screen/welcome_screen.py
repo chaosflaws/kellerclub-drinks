@@ -13,9 +13,11 @@ class WelcomeScreen(ResistantHandler):
         if event := res.datastore.current_event():
             content = render_template(res.jinjaenv,
                                       'welcome_screen/welcome_screen_running_event.jinja2',
+                                      self.canonical_url,
                                       event=event)
         else:
             content = render_template(res.jinjaenv,
-                                      'welcome_screen/welcome_screen_no_event.jinja2')
+                                      'welcome_screen/welcome_screen_no_event.jinja2',
+                                      self.canonical_url)
 
         return HtmlCreator().with_content(content.encode())
