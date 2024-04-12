@@ -66,6 +66,8 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
         return StaticHandler(path, 'text/css')
     elif path.endswith('.js') or path.endswith('.mjs'):
         return StaticHandler(path, 'text/javascript')
+    elif path.endswith('.woff2'):
+        return StaticHandler(path, 'font/woff2')
 
     # event-related URLs
     if (parts := path.split('/'))[1] == 'event':
@@ -138,7 +140,7 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
 
 
 def _valid_path(path: str) -> bool:
-    return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z]+)?$', path))
+    return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z0-9]+)?$', path))
 
 
 class FormParser:
