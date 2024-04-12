@@ -17,7 +17,7 @@
                 {% elif button.is_order_button %}
                     <li><button type="submit" name="order" value="{{ button.drink_name }}">{{ button.display_name }}</button></li>
                 {% elif button.is_link %}
-                    <li><a href="?layout={{ button.layout }}">{{ button.display_name }}</a></li>
+                    <li><a href="?layout={{ button.layout }}"><i class="bi-folder"></i>{{ button.display_name }}</a></li>
                 {% endif %}
             {% endfor %}
         {% endfor %}

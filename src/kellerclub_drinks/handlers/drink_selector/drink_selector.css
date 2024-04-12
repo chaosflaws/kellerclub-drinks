@@ -22,13 +22,28 @@
     touch-action: manipulation;
 }
 
+#drink-grid button {
+    background: none;
+    border: solid cyan 1px;
+    border-radius: .25rem;
+    font-size: 1em;
+
+    padding: 1rem;
+}
+
 #drink-grid a {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    background: lightyellow;
-    border-radius: 1rem;
+    border: solid cyan 1px;
+    border-radius: .25rem;
+
+    padding: 1rem;
 
     text-align: center;
+
+    color: black;
+    text-decoration: none;
 }
