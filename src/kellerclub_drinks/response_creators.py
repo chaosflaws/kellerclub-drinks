@@ -98,7 +98,7 @@ class SuccessCreator(CustomContentCreator):
 
     def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(200)
-        cache_control = str(settings.cache_age) if self.use_cache else 'no-cache'
+        cache_control = f'max-age={settings.cache_age}' if self.use_cache else 'no-cache'
         response_headers = [('Content-type', self.content_type),
                             ('Content-Length', str(len(self._content))),
                             ('Cache-Control', cache_control)]
