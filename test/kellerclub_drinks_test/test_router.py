@@ -59,7 +59,7 @@ class TestRouter(unittest.TestCase):
 
         for req, handler in route_to_handler.items():
             with self.subTest(req=req):
-                result = _route_post(req.path, req.content_type, req.content)
+                result = _route_post(req.path, '', req.content_type, req.content)
                 self.assertIsInstance(result, handler)
 
     def test_invalid_routes(self) -> None:
@@ -80,7 +80,7 @@ class TestRouter(unittest.TestCase):
                 self.assertIsInstance(handler, StaticHandler)
 
     def test_drink_selector_route(self) -> None:
-        valid_route = '/event/100/selector'
+        valid_route = '/event/100000/selector'
         self.assertIsInstance(_route_get(valid_route, None), DrinkSelector)
 
         non_digit_event_id = '/event/100a/selector'
@@ -97,7 +97,7 @@ class TestRouter(unittest.TestCase):
 
         valid_query = b'drink=test_drink&display_name=Test+Drink'
 
-        result = _route_post(path, 'application/x-www-form-urlencoded', valid_query)
+        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query)
 
         self.assertIsInstance(result, AddDrink)
 
@@ -106,6 +106,6 @@ class TestRouter(unittest.TestCase):
 
         valid_query = b'drink=test_drink&display_name=Test+Drink&drink=some_drink'
 
-        result = _route_post(path, 'application/x-www-form-urlencoded', valid_query)
+        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query)
 
         self.assertIsInstance(result, ErrorHandler)
