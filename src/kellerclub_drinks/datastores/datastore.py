@@ -62,8 +62,8 @@ class DataStore(ABC):
         """Returns the current event, if there is one, and None otherwise."""
 
     @abstractmethod
-    def add_order(self, drink: str) -> None:
-        """Adds an order with the current timestamp to the list of orders."""
+    def add_order(self, event_id: datetime, drink: str) -> None:
+        """Adds an order with the current timestamp to the list of orders for the given event."""
 
     @abstractmethod
     def all_layouts(self) -> dict[str, Layout]:

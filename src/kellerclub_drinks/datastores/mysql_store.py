@@ -79,33 +79,38 @@ class MysqlStore(DataStore):
     @staticmethod
     def _current_event(conn: PooledMySQLConnection) -> Optional[tuple[datetime, Optional[str]]]:
         cursor: MySQLCursor = conn.cursor()
-        cursor.execute(MysqlStore.any_unfinished_events_template)
+        cursor.execute(MysqlStore._any_unfinished_events_template)
         return cursor.fetchone()
 
-    any_unfinished_events_template = """
+    _any_unfinished_events_template = """
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def add_order(self, drink: str) -> None:
+    def add_order(self, event_id: datetime, drink: str) -> None:
         with self.pool.get_connection() as conn:
             cursor: MySQLCursor = conn.cursor()
             try:
-                sql_template = "INSERT INTO PurchaseOrder(drink_name) VALUES (%s)"
-                cursor.execute(sql_template, (drink,))
+                sql_template = "INSERT INTO PurchaseOrder(drink_name, event) VALUES (%s, %s)"
+                cursor.execute(sql_template, (drink, event_id))
                 conn.commit()
             except IntegrityError as e:
                 if e.errno == 1062:
-                    self._add_order_with_random_time_delta(drink, conn)
+                    self._add_order_with_random_time_delta(drink, event_id, conn)
                 else:
                     raise e
 
     @staticmethod
-    def _add_order_with_random_time_delta(drink: str, conn: PooledMySQLConnection):
+    def _add_order_with_random_time_delta(drink: str, event_id: datetime,
+                                          conn: PooledMySQLConnection):
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
-        sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (from_unixtime(%s), %s)"
         cursor = conn.cursor()
-        cursor.execute(sql_template, (randomized_timestamp, drink))
+        cursor.execute(MysqlStore._add_order_with_time_template,
+                       (randomized_timestamp, drink, event_id))
         conn.commit()
+
+    _add_order_with_time_template = """
+INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (from_unixtime(%s), %s, %s)
+"""
 
     def all_layouts(self) -> dict[str, Layout]:
         with self.pool.get_connection() as conn:

@@ -49,7 +49,7 @@ class SqliteStore(DataStore):
 
             if start_time:
                 insert_template = "INSERT INTO Event(start_time, name) VALUES (?, ?)"
-                conn.execute(insert_template, (start_time, name))
+                conn.execute(insert_template, (int(start_time.timestamp()), name))
             else:
                 insert_template = "INSERT INTO Event(name) VALUES (?)"
                 conn.execute(insert_template, (name,))
@@ -63,7 +63,7 @@ class SqliteStore(DataStore):
             if current_event:
                 event_id, _ = current_event
                 conn.execute("UPDATE Event SET end_time = ? WHERE start_time = ?",
-                             (end_time or datetime.now(), event_id))
+                             (end_time or int(datetime.now().timestamp()), event_id))
                 return True
             else:
                 return False
@@ -86,22 +86,23 @@ class SqliteStore(DataStore):
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def add_order(self, drink: str) -> None:
+    def add_order(self, event_id: datetime, drink: str) -> None:
         with connect(self.path, uri=True) as conn:
             try:
                 conn.execute("PRAGMA foreign_keys = ON;")
-                conn.execute("INSERT INTO PurchaseOrder(drink_name) VALUES (?)", (drink,))
+                template = "INSERT INTO PurchaseOrder(drink_name, event) VALUES (?, ?)"
+                conn.execute(template, (drink, int(event_id.timestamp())))
             except IntegrityError as e:
                 if e.sqlite_errorname == 'SQLITE_CONSTRAINT_PRIMARYKEY':
-                    self._add_order_with_random_time_delta(drink, conn)
+                    self._add_order_with_random_time_delta(drink, event_id, conn)
                 else:
                     raise e
 
     @staticmethod
-    def _add_order_with_random_time_delta(drink: str, conn: Connection):
+    def _add_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection):
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
-        sql_template = "INSERT INTO PurchaseOrder(time, drink_name) VALUES (?, ?)"
-        conn.execute(sql_template, (randomized_timestamp, drink))
+        sql_template = "INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (?, ?, ?)"
+        conn.execute(sql_template, (randomized_timestamp, drink, event_id))
 
     def all_layouts(self) -> dict[str, Layout]:
         with connect(self.path, uri=True) as conn:

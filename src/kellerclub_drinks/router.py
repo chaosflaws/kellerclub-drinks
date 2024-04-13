@@ -1,6 +1,7 @@
 """Methods to deliver an HTTP request to the appropriate handler."""
 import json
 import re
+from datetime import datetime
 from typing import Optional
 from urllib.parse import parse_qs
 from wsgiref.types import WSGIEnvironment
@@ -72,14 +73,14 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
     # event-related URLs
     if (parts := path.split('/'))[1] == 'event':
         if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
-            event_id = parts[2]
+            event_id = datetime.fromtimestamp(int(parts[2]))
             return _get_drink_selector(event_id, query)
 
     # give up
     return ErrorHandler(404, f"Unknown GET route {path}!")
 
 
-def _get_drink_selector(event_id: str, query: Optional[str]) -> Handler:
+def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
     if query is None or query == '':
         return DrinkSelector(event_id)
 
@@ -104,9 +105,11 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
     stripped_path = path.rstrip('/')
     if stripped_path == '/add_order':
         try:
-            parser = FormParser(order=1)
+            parser = FormParser(order=1, event=1)
             parsed_query = parser.parse(content.decode(), content_type=content_type)
-            return AddOrder(parsed_query['order'][0], RequestSource.FORM)
+            return AddOrder(parsed_query['order'][0],
+                            datetime.fromtimestamp(int(parsed_query['event'][0])),
+                            RequestSource.FORM)
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
@@ -132,7 +135,12 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             elif not isinstance(parsed_json['order'], str):
                 return ErrorHandler(400, "'order' is not a string!")
             else:
-                return AddOrder(parsed_json['order'], RequestSource.AJAX)
+                if 'event' not in parsed_json:
+                    return ErrorHandler(400, "Key 'event' not present!")
+                elif not isinstance(parsed_json['event'], int):
+                    return ErrorHandler(400, "'event' is not a number!")
+                else:
+                    return AddOrder(parsed_json['order'], datetime.fromtimestamp(parsed_json['event']), RequestSource.AJAX)
         except ValueError:
             return ErrorHandler(400, f"Malformed JSON {content.decode()}!")
 

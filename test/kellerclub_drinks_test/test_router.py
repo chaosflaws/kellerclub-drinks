@@ -51,10 +51,10 @@ class TestRouter(unittest.TestCase):
         route_to_handler: dict[PostRequest, type[Handler]] = {
             PostRequest('/add_order',
                         'application/x-www-form-urlencoded',
-                        b'order=some_drink'): AddOrder,
+                        b'order=some_drink&event=100'): AddOrder,
             PostRequest('/api/add_order',
                         'application/json',
-                        b'{"order":"some_drink"}'): AddOrder
+                        b'{"order":"some_drink","event":100}'): AddOrder
         }
 
         for req, handler in route_to_handler.items():

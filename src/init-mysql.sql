@@ -16,10 +16,10 @@ CREATE TABLE Event (
 CREATE TABLE PurchaseOrder (
     time TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP PRIMARY KEY,
     drink_name VARCHAR(100) NOT NULL,
-    /*event TIMESTAMP NOT NULL,*/
+    event TIMESTAMP NOT NULL,
 
-    FOREIGN KEY (drink_name) REFERENCES Drink(name)
-    /*FOREIGN KEY (event) REFERENCES Event(start_time)*/
+    FOREIGN KEY (drink_name) REFERENCES Drink(name),
+    FOREIGN KEY (event) REFERENCES Event(start_time)
 );
 
 CREATE TABLE SelectorLayout (

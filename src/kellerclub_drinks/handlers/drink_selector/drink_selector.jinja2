@@ -9,6 +9,7 @@
 
 {% block main_content %}
 <form method="POST" action="/add_order">
+    <input class="hidden" name="event" value="{{ event_id }}">
     <ul id="drink-grid">
         {% for row in layout.buttons %}
             {% for button in row %}

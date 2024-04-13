@@ -5,7 +5,13 @@ for (const button of buttons) {
         e.preventDefault();
         fetch('/api/add_order', {
             method: 'POST',
-            body: JSON.stringify({'order': button.value})
+            body: JSON.stringify({'order': button.value, 'event': Number(getEventId())})
         });
     }
+}
+
+function getEventId() {
+    const inputs = document.getElementsByTagName('input');
+    const eventInput = inputs.namedItem('event');
+    return eventInput.value;
 }

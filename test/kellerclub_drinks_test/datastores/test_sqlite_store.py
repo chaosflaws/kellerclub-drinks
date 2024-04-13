@@ -4,6 +4,7 @@
 import sqlite3
 import time
 import unittest
+from datetime import datetime
 from typing import Optional
 
 from kellerclub_drinks.datastores.sqlite_store import SqliteStore
@@ -36,8 +37,10 @@ class TestSqliteStore(unittest.TestCase):
         display_name = 'Tap Beer .4l'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
         store.add_drink(Drink(drink_name, display_name))
+        start_time = datetime.now()
+        store.start_event(start_time)
 
-        store.add_order(drink_name)
+        store.add_order(start_time, drink_name)
 
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             timestamp = db.execute("SELECT time FROM PurchaseOrder").fetchone()[0]

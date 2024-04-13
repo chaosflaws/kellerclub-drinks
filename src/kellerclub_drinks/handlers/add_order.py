@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from .errors.error import ResistantHandler
 from ..resources import Resources
 from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, ErrorCreator, \
@@ -7,8 +9,9 @@ from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, Err
 class AddOrder(ResistantHandler):
     """Adds a time-stamped drink order to the datastore."""
 
-    def __init__(self, drink_name: str, source: RequestSource):
+    def __init__(self, drink_name: str, event_id: datetime, source: RequestSource):
         self.drink_name = drink_name
+        self.event_id = event_id
         self.source = source
 
     @property
@@ -16,7 +19,7 @@ class AddOrder(ResistantHandler):
         return '/add_order'
 
     def _handle(self, res: Resources) -> ResponseCreator:
-        res.datastore.add_order(self.drink_name)
+        res.datastore.add_order(self.event_id, self.drink_name)
 
         match self.source:
             case RequestSource.FORM:

@@ -15,7 +15,9 @@ CREATE TABLE Event (
 CREATE TABLE PurchaseOrder (
     time NUMERIC NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
     drink_name TEXT NOT NULL
-        REFERENCES Drink(name)
+        REFERENCES Drink(name),
+    event NUMERIC NOT NULL
+        REFERENCES Event(start_time)
 );
 
 CREATE TABLE SelectorLayout (
