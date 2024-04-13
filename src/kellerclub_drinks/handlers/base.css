@@ -113,10 +113,14 @@ body {
   list-style-type: none;
 }
 
-#main-menu li a {
+#main-menu li > * {
   display: block;
   padding: .5rem;
   background-color: lightgreen;
+}
+
+#main-menu li > span {
+  font-weight: bold;
 }
 
 #main-menu li a:hover {

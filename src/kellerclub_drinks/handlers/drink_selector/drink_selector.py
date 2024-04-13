@@ -12,12 +12,12 @@ class DrinkSelector(ResistantHandler):
     """Provides an HTML interface to add lots of orders quickly."""
 
     def __init__(self, event_id: datetime, layout_name: str = 'default'):
-        self.event_id = event_id
+        self.event_start = int(event_id.timestamp())
         self.layout_name = layout_name
 
     @property
     def canonical_url(self) -> str:
-        return f'/event/{self.event_id}/selector'
+        return f'/event/{self.event_start}/selector'
 
     def _handle(self, res: Resources) -> ResponseCreator:
         layouts = res.datastore.all_layouts()
@@ -27,6 +27,6 @@ class DrinkSelector(ResistantHandler):
 
         content = render_template(res.jinjaenv, SELECTOR_TEMPLATE,
                                   self.canonical_url,
-                                  event_id=int(self.event_id.timestamp()),
+                                  event_id=self.event_start,
                                   layout=layouts[self.layout_name])
         return HtmlCreator().with_content(content.encode())

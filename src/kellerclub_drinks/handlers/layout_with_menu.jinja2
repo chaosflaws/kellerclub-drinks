@@ -1,9 +1,17 @@
 {% extends 'base.jinja2' %}
 
+{% set main_nav = [('/', 'Home'), ('/drinks', 'Drink List')] %}
+
 {% block content %}
 <nav id="main-menu">
     <ul>
-        <li><a href="/">Home</a></li>
+        {% for item in main_nav %}
+            {% if url == item[0] %}
+                <li><span>{{ item[1] }}</span></li>
+            {% else %}
+                <li><a href="{{ item[0] }}">{{ item[1] }}</a></li>
+            {% endif %}
+        {% endfor %}
     </ul>
 </nav>
 {% block main_content %}{% endblock %}
