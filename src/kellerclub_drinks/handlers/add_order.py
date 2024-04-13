@@ -9,10 +9,12 @@ from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, Err
 class AddOrder(ResistantHandler):
     """Adds a time-stamped drink order to the datastore."""
 
-    def __init__(self, drink_name: str, event_id: datetime, source: RequestSource):
+    def __init__(self, drink_name: str, event_id: datetime,
+                 source: RequestSource, redirect_url: str):
         self.drink_name = drink_name
         self.event_id = event_id
         self.source = source
+        self.redirect_url = redirect_url
 
     @property
     def canonical_url(self) -> str:
@@ -23,7 +25,7 @@ class AddOrder(ResistantHandler):
 
         match self.source:
             case RequestSource.FORM:
-                return RedirectCreator('/')
+                return RedirectCreator(self.redirect_url)
             case RequestSource.AJAX:
                 return AjaxCreator(200).with_content(b'')
             case _:

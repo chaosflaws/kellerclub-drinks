@@ -25,6 +25,7 @@ def route(environ: WSGIEnvironment) -> Handler:
 
     method: str = environ['REQUEST_METHOD']
     path: str = environ['PATH_INFO']
+    referer: Optional[str] = environ.get('HTTP_REFERER', None)
     query: Optional[str] = environ.get('QUERY_STRING', None)
     content_type: Optional[str] = environ.get('CONTENT_TYPE', None)
     content: bytes = _get_content(environ)
@@ -32,7 +33,7 @@ def route(environ: WSGIEnvironment) -> Handler:
     if method.lower() == 'get':
         return _route_get(path, query)
     elif method.lower() == 'post':
-        return _route_post(path, content_type, content)
+        return _route_post(path, referer, content_type, content)
     else:
         return ErrorHandler(400, 'Unsupported HTTP method!')
 
@@ -95,7 +96,8 @@ def _valid_layout(path: str) -> bool:
     return bool(re.match(r'^[a-zA-Z_]+$', path))
 
 
-def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handler:
+def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
+                content: bytes) -> Handler:
     # catch the funky stuff
     if not _valid_path(path):
         print(f'Invalid path {path}!')
@@ -109,7 +111,7 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0],
                             datetime.fromtimestamp(int(parsed_query['event'][0])),
-                            RequestSource.FORM)
+                            RequestSource.FORM, referer)
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
@@ -140,7 +142,9 @@ def _route_post(path: str, content_type: Optional[str], content: bytes) -> Handl
                 elif not isinstance(parsed_json['event'], int):
                     return ErrorHandler(400, "'event' is not a number!")
                 else:
-                    return AddOrder(parsed_json['order'], datetime.fromtimestamp(parsed_json['event']), RequestSource.AJAX)
+                    return AddOrder(parsed_json['order'],
+                                    datetime.fromtimestamp(parsed_json['event']),
+                                    RequestSource.AJAX, referer or '/')
         except ValueError:
             return ErrorHandler(400, f"Malformed JSON {content.decode()}!")
 
