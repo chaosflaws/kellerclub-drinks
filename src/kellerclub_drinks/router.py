@@ -16,7 +16,6 @@ from .handlers.start_event import StartEvent
 from .handlers.stop_event import StopEvent
 from .handlers.welcome_screen.welcome_screen import WelcomeScreen
 from .model.drinks import Drink
-from .model.events import Event
 from .response_creators import RequestSource
 
 

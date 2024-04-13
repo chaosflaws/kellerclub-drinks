@@ -49,6 +49,5 @@ class ErrorHandler(Handler):
 
             return ErrorCreator(self.status_code).with_content(content.encode())
         except TemplateError:
-            print()
             with open('kellerclub_drinks/handlers/errors/400_jinja_error.html', 'rb') as error_file:
                 return ErrorCreator(400).with_content(error_file.read())

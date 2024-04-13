@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 import unittest
 from dataclasses import dataclass
 
+from kellerclub_drinks.handlers.add_drink import AddDrink
 from kellerclub_drinks.handlers.add_order import AddOrder
+from kellerclub_drinks.handlers.common_handlers import StaticHandler
 from kellerclub_drinks.handlers.drink_list.drink_list import DrinkList
+from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelector
+from kellerclub_drinks.handlers.errors.error import ErrorHandler
 from kellerclub_drinks.handlers.handler import Handler
 from kellerclub_drinks.handlers.welcome_screen.welcome_screen import WelcomeScreen
 from kellerclub_drinks.router import _route_get, _route_post
@@ -55,3 +61,51 @@ class TestRouter(unittest.TestCase):
             with self.subTest(req=req):
                 result = _route_post(req.path, req.content_type, req.content)
                 self.assertIsInstance(result, handler)
+
+    def test_invalid_routes(self) -> None:
+        invalid_urls = ['..', '-']
+
+        for url in invalid_urls:
+            with self.subTest(url=url):
+                req = GetRequest.from_url(url)
+                handler = _route_get(req.path, req.query)
+                self.assertIsInstance(handler, ErrorHandler)
+
+    def test_static_routes(self) -> None:
+        static_urls = ['/base.css', '/font.woff2']
+
+        for url in static_urls:
+            with self.subTest(url=url):
+                handler = _route_get(url, None)
+                self.assertIsInstance(handler, StaticHandler)
+
+    def test_drink_selector_route(self) -> None:
+        valid_route = '/event/100/selector'
+        self.assertIsInstance(_route_get(valid_route, None), DrinkSelector)
+
+        non_digit_event_id = '/event/100a/selector'
+        self.assertIsInstance(_route_get(non_digit_event_id, None), ErrorHandler)
+
+        valid_layout_query = 'layout=default'
+        self.assertIsInstance(_route_get(valid_route, valid_layout_query), DrinkSelector)
+
+        invalid_layout_query = 'layout?=default'
+        self.assertIsInstance(_route_get(valid_route, invalid_layout_query), ErrorHandler)
+
+    def test_valid_add_drink_route(self) -> None:
+        path = '/add_drink'
+
+        valid_query = b'drink=test_drink&display_name=Test+Drink'
+
+        result = _route_post(path, 'application/x-www-form-urlencoded', valid_query)
+
+        self.assertIsInstance(result, AddDrink)
+
+    def test_add_drink_route_with_two_drinks(self) -> None:
+        path = '/add_drink'
+
+        valid_query = b'drink=test_drink&display_name=Test+Drink&drink=some_drink'
+
+        result = _route_post(path, 'application/x-www-form-urlencoded', valid_query)
+
+        self.assertIsInstance(result, ErrorHandler)
