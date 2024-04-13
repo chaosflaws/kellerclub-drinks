@@ -6,6 +6,10 @@ from ..response_creators import ResponseCreator, RedirectCreator
 class StartEvent(ResistantHandler):
     """Starts an event at the current time."""
 
+    @property
+    def canonical_url(self) -> str:
+        return '/start_event'
+
     def _handle(self, res: Resources) -> ResponseCreator:
         try:
             res.datastore.start_event()
