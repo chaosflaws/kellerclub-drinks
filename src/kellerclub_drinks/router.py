@@ -3,9 +3,9 @@ import json
 import re
 from datetime import datetime
 from typing import Optional
-from urllib.parse import parse_qs
 from wsgiref.types import WSGIEnvironment
 
+from .form_parser import FormParser, Param
 from .handlers.errors.error import ErrorHandler
 from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
@@ -82,11 +82,8 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
 
 
 def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
-    if query is None or query == '':
-        return DrinkSelector(event_id)
-
     try:
-        params = FormParser(layout=1).parse(query or '')
+        params = FormParser(Param('layout', 1, 1, ['default'])).parse(query or '')
         return DrinkSelector(event_id, params['layout'][0])
     except ValueError as e:
         return ErrorHandler(400, str(e))
@@ -107,7 +104,8 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
     stripped_path = path.rstrip('/')
     if stripped_path == '/add_order':
         try:
-            parser = FormParser(order=1, event=1)
+            parser = FormParser(Param('order', 1, 1),
+                                Param('event', 1, 1))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0],
                             datetime.fromtimestamp(int(parsed_query['event'][0])),
@@ -116,7 +114,8 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
         try:
-            parser = FormParser(drink=1, display_name=1)
+            parser = FormParser(Param('drink', 1, 1),
+                                Param('display_name', 1, 1))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]
@@ -154,27 +153,3 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
 
 def _valid_path(path: str) -> bool:
     return bool(re.match(r'^[a-zA-Z0-9/_]*(\.[a-z0-9]+)?$', path))
-
-
-class FormParser:
-    """Parser for a query string formatted as HTML form data."""
-
-    def __init__(self, **valid_params: int):
-        self.valid_params = valid_params
-
-    def parse(self, query: str, /, content_type: Optional[str] = None) -> dict[str, list[str]]:
-        if content_type not in [None, 'application/x-www-form-urlencoded']:
-            raise ValueError('Wrong Content Type!')
-
-        payload = parse_qs(query)
-
-        if len(payload) != len(self.valid_params):
-            raise ValueError('Argument list has wrong length!')
-
-        for param, count in self.valid_params.items():
-            if param not in payload:
-                raise ValueError(f'Param {param} not valid!')
-            if len(payload[param]) != count:
-                raise ValueError(f'Param {param} has wrong number of values!')
-
-        return payload
