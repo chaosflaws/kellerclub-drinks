@@ -111,7 +111,7 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0],
                             datetime.fromtimestamp(int(parsed_query['event'][0])),
-                            RequestSource.FORM, referer)
+                            RequestSource.FORM, referer or '')
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
