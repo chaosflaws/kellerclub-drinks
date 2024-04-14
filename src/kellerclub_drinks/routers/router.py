@@ -36,7 +36,7 @@ def route(environ: WSGIEnvironment) -> Handler:
     if method.lower() == 'get':
         return _route_get(path, query, cookie)
     elif method.lower() == 'post':
-        return _route_post(path, referer, content_type, content)
+        return _route_post(path, referer, content_type, content, cookie)
     else:
         return ErrorHandler(400, 'Unsupported HTTP method!')
 
@@ -91,16 +91,10 @@ def _get_drink_selector(event_id: int, query: Optional[str],
         parser = FormParser(SingleValueParam('layout', default=['default']),
                             BooleanParam('autosubmit', default=['true']))
         params = parser.parse(query or '')
-        if (morsel := cookie.get(f'event-{event_id}-orders')) is not None:
-            stored_orders = [value
-                             for value in morsel.value.split(',')
-                             if Drink.valid_name(value)]
-        else:
-            stored_orders = []
         return DrinkSelector(datetime.fromtimestamp(event_id),
                              params['layout'][0],
                              params['autosubmit'][0],
-                             stored_orders)
+                             _get_orders(cookie, event_id))
     except ValueError as e:
         return ErrorHandler(400, str(e))
 
@@ -109,8 +103,17 @@ def _valid_layout(path: str) -> bool:
     return bool(re.match(r'^[a-zA-Z_]+$', path))
 
 
+def _get_orders(cookie: SimpleCookie, event_id: int) -> list[str]:
+    if (morsel := cookie.get(f'event-{event_id}-orders')) is not None:
+        return [value
+                for value in morsel.value.split(',')
+                if Drink.valid_name(value)]
+    else:
+        return []
+
+
 def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
-                content: bytes) -> Handler:
+                content: bytes, cookie: SimpleCookie) -> Handler:
     # catch the funky stuff
     if not _valid_path(path):
         print(f'Invalid path {path}!')
@@ -123,8 +126,10 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             parser = FormParser(SingleValueParam('order'),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
+            event_id = int(parsed_query['event'][0])
             return AddOrderToClient(parsed_query['order'][0],
-                                    datetime.fromtimestamp(int(parsed_query['event'][0])),
+                                    event_id,
+                                    _get_orders(cookie, event_id),
                                     referer or '/')
         except ValueError as e:
             return ErrorHandler(400, str(e))

@@ -63,7 +63,7 @@ class TestRouter(unittest.TestCase):
 
         for req, handler in route_to_handler.items():
             with self.subTest(req=req):
-                result = _route_post(req.path, '', req.content_type, req.content)
+                result = _route_post(req.path, '', req.content_type, req.content, EMPTY_COOKIE)
                 self.assertIsInstance(result, handler)
 
     def test_invalid_routes(self) -> None:
@@ -105,7 +105,7 @@ class TestRouter(unittest.TestCase):
 
         valid_query = b'drink=test_drink&display_name=Test+Drink'
 
-        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query)
+        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query, EMPTY_COOKIE)
 
         self.assertIsInstance(result, AddDrink)
 
@@ -114,6 +114,6 @@ class TestRouter(unittest.TestCase):
 
         valid_query = b'drink=test_drink&display_name=Test+Drink&drink=some_drink'
 
-        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query)
+        result = _route_post(path, '', 'application/x-www-form-urlencoded', valid_query, EMPTY_COOKIE)
 
         self.assertIsInstance(result, ErrorHandler)
