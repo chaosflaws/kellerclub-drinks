@@ -5,20 +5,20 @@ from datetime import datetime
 from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
-from .form_parser import FormParser, Param, SingleValueParam, BooleanParam
-from .handlers.add_order import AddOrderToClient
-from .handlers.errors.error import ErrorHandler
-from .handlers.add_drink import AddDrink
-from .handlers.drink_list.drink_list import DrinkList
-from .handlers.submit_order import SubmitOrder
-from .handlers.drink_selector.drink_selector import DrinkSelector
-from .handlers.common_handlers import StaticHandler
-from .handlers.handler import Handler
-from .handlers.start_event import StartEvent
-from .handlers.stop_event import StopEvent
-from .handlers.welcome_screen.welcome_screen import WelcomeScreen
-from .model.drinks import Drink
-from .response_creators import RequestSource
+from .form_parser import FormParser, SingleValueParam, BooleanParam
+from ..handlers.add_order import AddOrderToClient
+from ..handlers.errors.error import ErrorHandler
+from ..handlers.add_drink import AddDrink
+from ..handlers.drink_list.drink_list import DrinkList
+from ..handlers.submit_order import SubmitOrder
+from ..handlers.drink_selector.drink_selector import DrinkSelector
+from ..handlers.common_handlers import StaticHandler
+from ..handlers.handler import Handler
+from ..handlers.start_event import StartEvent
+from ..handlers.stop_event import StopEvent
+from ..handlers.welcome_screen.welcome_screen import WelcomeScreen
+from ..model.drinks import Drink
+from ..response_creators import RequestSource
 
 
 def route(environ: WSGIEnvironment) -> Handler:

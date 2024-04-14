@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import dataclass
+from http.cookies import SimpleCookie
 
 from kellerclub_drinks.handlers.add_drink import AddDrink
 from kellerclub_drinks.handlers.submit_order import SubmitOrder
@@ -11,7 +12,10 @@ from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelect
 from kellerclub_drinks.handlers.errors.error import ErrorHandler
 from kellerclub_drinks.handlers.handler import Handler
 from kellerclub_drinks.handlers.welcome_screen.welcome_screen import WelcomeScreen
-from kellerclub_drinks.router import _route_get, _route_post
+from kellerclub_drinks.routers.router import _route_get, _route_post
+
+
+EMPTY_COOKIE = SimpleCookie()
 
 
 @dataclass(frozen=True)
@@ -45,7 +49,7 @@ class TestRouter(unittest.TestCase):
         for url, handler in route_to_handler.items():
             with self.subTest(req=url):
                 req = GetRequest.from_url(url)
-                self.assertIsInstance(_route_get(req.path, req.query), handler)
+                self.assertIsInstance(_route_get(req.path, req.query, EMPTY_COOKIE), handler)
 
     def test_post_routes(self) -> None:
         route_to_handler: dict[PostRequest, type[Handler]] = {
@@ -68,7 +72,7 @@ class TestRouter(unittest.TestCase):
         for url in invalid_urls:
             with self.subTest(url=url):
                 req = GetRequest.from_url(url)
-                handler = _route_get(req.path, req.query)
+                handler = _route_get(req.path, req.query, EMPTY_COOKIE)
                 self.assertIsInstance(handler, ErrorHandler)
 
     def test_static_routes(self) -> None:
@@ -76,21 +80,25 @@ class TestRouter(unittest.TestCase):
 
         for url in static_urls:
             with self.subTest(url=url):
-                handler = _route_get(url, None)
+                handler = _route_get(url, None, EMPTY_COOKIE)
                 self.assertIsInstance(handler, StaticHandler)
 
     def test_drink_selector_route(self) -> None:
         valid_route = '/event/100000/selector'
-        self.assertIsInstance(_route_get(valid_route, None), DrinkSelector)
+        self.assertIsInstance(_route_get(valid_route, None, EMPTY_COOKIE),
+                              DrinkSelector)
 
         non_digit_event_id = '/event/100a/selector'
-        self.assertIsInstance(_route_get(non_digit_event_id, None), ErrorHandler)
+        self.assertIsInstance(_route_get(non_digit_event_id, None, EMPTY_COOKIE),
+                              ErrorHandler)
 
         valid_layout_query = 'layout=default'
-        self.assertIsInstance(_route_get(valid_route, valid_layout_query), DrinkSelector)
+        self.assertIsInstance(_route_get(valid_route, valid_layout_query, EMPTY_COOKIE),
+                              DrinkSelector)
 
         invalid_layout_query = 'layout?=default'
-        self.assertIsInstance(_route_get(valid_route, invalid_layout_query), ErrorHandler)
+        self.assertIsInstance(_route_get(valid_route, invalid_layout_query, EMPTY_COOKIE),
+                              ErrorHandler)
 
     def test_valid_add_drink_route(self) -> None:
         path = '/add_drink'

@@ -3,7 +3,7 @@
 
 import unittest
 
-from kellerclub_drinks.form_parser import FormParser, Param, BooleanParam
+from kellerclub_drinks.routers.form_parser import FormParser, Param, BooleanParam
 
 
 class TestFormParser(unittest.TestCase):
