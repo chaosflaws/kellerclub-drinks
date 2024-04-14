@@ -12,7 +12,7 @@ class FormParser:
     def __init__(self, *valid_params: Param[Any]):
         self.valid_params = valid_params
 
-    def parse(self, query: str, /, content_type: Optional[str] = None) -> dict[str, list[str]]:
+    def parse(self, query: str, /, content_type: Optional[str] = None) -> dict[str, Any]:
         """Parses the given form data, validating it against expected parameters.
 
         Returns the parsed data as a dictionary of value lists.

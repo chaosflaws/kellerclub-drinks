@@ -1,7 +1,12 @@
 #drink-grid {
-    max-width: 1000px;
-    height: 100%;
-    max-height: 800px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+#drink-grid ul {
+    max-width: 100ex;
+    max-height: 50em;
 
     display: grid;
     grid: repeat(5, 1fr) / repeat(5, 1fr);
@@ -43,8 +48,20 @@
     text-decoration: none;
 }
 
-@media (width >= 1000px) {
+#order-list {
+    max-width: 30ex;
+}
+
+#order-list h1 {
+    margin-top: 0;
+}
+
+@media (width >= 131ex) {
     #drink-grid {
+        flex-wrap: nowrap;
+    }
+
+    #drink-grid ul {
         gap: .5rem;
     }
 

@@ -86,7 +86,7 @@ def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
         parser = FormParser(SingleValueParam('layout', default=['default']),
                             BooleanParam('autosubmit', default=['true']))
         params = parser.parse(query or '')
-        return DrinkSelector(event_id, params['layout'][0])
+        return DrinkSelector(event_id, params['layout'][0], params['autosubmit'][0])
     except ValueError as e:
         return ErrorHandler(400, str(e))
 

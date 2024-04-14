@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block main_content %}
-<form method="POST" action="/add_order">
+<form id="drink-grid" method="POST" action="/add_order">
     <input class="hidden" name="event" value="{{ event_id }}">
-    <ul id="drink-grid">
+    <ul>
         {% for row in layout.buttons %}
             {% for button in row %}
                 {% if button is none %}
@@ -23,5 +23,8 @@
             {% endfor %}
         {% endfor %}
     </ul>
+    {% if not autosubmit %}
+        <div id="order-list"><h1>Bestellungen</h1></div>
+    {% endif %}
 </form>
 {% endblock %}

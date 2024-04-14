@@ -11,9 +11,10 @@ SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
 class DrinkSelector(ResistantHandler):
     """Provides an HTML interface to add lots of orders quickly."""
 
-    def __init__(self, event_id: datetime, layout_name: str):
+    def __init__(self, event_id: datetime, layout_name: str, autosubmit: bool):
         self.event_start = int(event_id.timestamp())
         self.layout_name = layout_name
+        self.autosubmit = autosubmit
 
     @property
     def canonical_url(self) -> str:
@@ -28,5 +29,6 @@ class DrinkSelector(ResistantHandler):
         content = render_template(res.jinjaenv, SELECTOR_TEMPLATE,
                                   self.canonical_url,
                                   event_id=self.event_start,
-                                  layout=layouts[self.layout_name])
+                                  layout=layouts[self.layout_name],
+                                  autosubmit=self.autosubmit)
         return HtmlCreator().with_content(content.encode())
