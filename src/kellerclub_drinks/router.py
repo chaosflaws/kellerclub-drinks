@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
-from .form_parser import FormParser, Param
+from .form_parser import FormParser, Param, SingleValueParam
 from .handlers.errors.error import ErrorHandler
 from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
@@ -83,7 +83,10 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
 
 def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
     try:
-        params = FormParser(Param('layout', 1, 1, ['default'])).parse(query or '')
+        parser = FormParser(SingleValueParam('layout', default=['default']),
+                            SingleValueParam('autosubmit', default=['true'],
+                                             allowed=['true', 'false']))
+        params = parser.parse(query or '')
         return DrinkSelector(event_id, params['layout'][0])
     except ValueError as e:
         return ErrorHandler(400, str(e))
@@ -104,8 +107,8 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
     stripped_path = path.rstrip('/')
     if stripped_path == '/add_order':
         try:
-            parser = FormParser(Param('order', 1, 1),
-                                Param('event', 1, 1))
+            parser = FormParser(SingleValueParam('order'),
+                                SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             return AddOrder(parsed_query['order'][0],
                             datetime.fromtimestamp(int(parsed_query['event'][0])),
@@ -114,8 +117,8 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
         try:
-            parser = FormParser(Param('drink', 1, 1),
-                                Param('display_name', 1, 1))
+            parser = FormParser(SingleValueParam('drink'),
+                                SingleValueParam('display_name'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]

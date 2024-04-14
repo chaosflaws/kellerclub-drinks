@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import dataclasses
+from dataclasses import dataclass, field
 from typing import Optional
 from urllib.parse import parse_qs
 
@@ -28,13 +29,20 @@ class FormParser:
 
         for param in self.valid_params:
             if param.key not in payload:
-                payload[param.key] = param.default_value or []
-            if (length := len(payload[param.key])) < param.min_values:
+                payload[param.key] = param.default or []
+
+            values = payload[param.key]
+            if (length := len(values)) < param.min_values:
                 raise ValueError(f'Param {param.key} does not have enough values '
                                  f'({length}<{param.min_values})!')
-            if param.max_values and (length := len(payload[param.key])) > param.max_values:
+            if param.max_values and (length := len(values)) > param.max_values:
                 raise ValueError(f'Param {param.key} has too many values '
                                  f'({length}>{param.max_values})!')
+            if param.allowed:
+                for value in values:
+                    if value not in param.allowed:
+                        raise ValueError(f'Value {value} for key {param.key} not '
+                                         f'in allowed values ({param.allowed})!')
 
         return payload
 
@@ -46,4 +54,14 @@ class Param:
     key: str
     min_values: int = 0
     max_values: Optional[int] = None
-    default_value: Optional[list[str]] = None
+    _: dataclasses.KW_ONLY = None
+    default: Optional[list[str]] = None
+    allowed: Optional[list[str]] = None
+
+
+@dataclass(frozen=True)
+class SingleValueParam(Param):
+    """Describes a parameter that can take exactly one value."""
+
+    min_values: int = field(default=1, init=False, repr=False)
+    max_values: Optional[int] = field(default=1, init=False, repr=False)

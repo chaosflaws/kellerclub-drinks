@@ -29,14 +29,14 @@ class TestFormParser(unittest.TestCase):
     def test_parser__no_value_for_default_param__uses_default(self) -> None:
         query = ''
 
-        parser = FormParser(Param('key', 1, 1, ['default']))
+        parser = FormParser(Param('key', 1, 1, default=['default']))
 
         self.assertEqual({'key': ['default']}, parser.parse(query))
 
     def test_parser__max_values_omitted__query_can_have_any_number_of_values(self) -> None:
         query = 'k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v&k=v'
 
-        parser = FormParser(Param('k', 1, default_value=['default']))
+        parser = FormParser(Param('k', 1, default=['default']))
 
         self.assertEqual(15, len(parser.parse(query)['k']))
 
@@ -46,3 +46,17 @@ class TestFormParser(unittest.TestCase):
         parser = FormParser(Param('k', max_values=1))
 
         self.assertEqual(0, len(parser.parse(query)['k']))
+
+    def test_parser__allowed_values_is_none__does_not_check_values(self) -> None:
+        query = 'key=value'
+
+        parser = FormParser(Param('key', 1, 1))
+
+        self.assertEqual({'key': ['value']}, parser.parse(query))
+
+    def test_parser__has_allowed_values__values_must_be_in_allowed_values(self) -> None:
+        query = 'key=first'
+
+        parser = FormParser(Param('key', 1, 1, allowed=['second']))
+
+        self.assertRaises(ValueError, lambda: parser.parse(query))
