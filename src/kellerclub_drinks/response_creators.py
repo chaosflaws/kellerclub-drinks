@@ -21,7 +21,7 @@ _STATUS_MESSAGES = {
 }
 
 
-def _get_status_string(status_code: int):
+def _get_status_string(status_code: int) -> str:
     return f'{status_code} {_STATUS_MESSAGES[status_code]}'
 
 
@@ -115,7 +115,7 @@ class StaticCreator(SuccessCreator):
 
 class HtmlCreator(SuccessCreator):
     """Serves HTML content as a successful HTTP response."""
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('text/html; charset=utf-8', False)
 
 
@@ -125,7 +125,7 @@ class AjaxCreator(CustomContentCreator):
     def __init__(self, status_code: int):
         self.status_code = status_code
 
-    def with_json_content(self, content: Any):
+    def with_json_content(self, content: Any) -> None:
         """
         Encode the content object as a json string and set it as the response
         content.

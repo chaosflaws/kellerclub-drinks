@@ -2,22 +2,22 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Iterator
 
 Row = list[Optional['Button']]
 
 
 @dataclass(frozen=True)
-class Layout(Iterable):
+class Layout(Iterable[Row]):
     """A 5x5 grid of buttons that can be used to record orders."""
 
     id: str
     buttons: list[Row]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Row]:
         return self.buttons.__iter__()
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Row:
         if not isinstance(index, int):
             raise TypeError
 
@@ -32,12 +32,12 @@ class Button(ABC):
 
     @property
     @abstractmethod
-    def is_order_button(self):
+    def is_order_button(self) -> bool:
         """True if the button records an order, false otherwise."""
 
     @property
     @abstractmethod
-    def is_link(self):
+    def is_link(self) -> bool:
         """True if the button links to another layout, false otherwise."""
 
 
@@ -48,11 +48,11 @@ class OrderButton(Button):
     drink_name: str
 
     @property
-    def is_order_button(self):
+    def is_order_button(self) -> bool:
         return True
 
     @property
-    def is_link(self):
+    def is_link(self) -> bool:
         return False
 
 
@@ -63,9 +63,9 @@ class LinkButton(Button):
     layout: Layout
 
     @property
-    def is_order_button(self):
+    def is_order_button(self) -> bool:
         return False
 
     @property
-    def is_link(self):
+    def is_link(self) -> bool:
         return True

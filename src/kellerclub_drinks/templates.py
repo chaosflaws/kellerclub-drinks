@@ -4,7 +4,7 @@ from jinja2 import TemplateError, Environment
 
 
 def render_template(env: Environment, path: str, url: str,
-                    **values: Any):
+                    **values: Any) -> str:
     template = None
     try:
         template = env.get_template(path)

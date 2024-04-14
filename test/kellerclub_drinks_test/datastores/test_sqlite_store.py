@@ -13,13 +13,13 @@ from kellerclub_drinks.model.layouts import OrderButton
 
 
 class TestSqliteStore(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             with open('../src/init-sqlite3.sql', 'r', encoding='utf8') as sql_file:
                 sql = sql_file.read()
                 db.executescript(sql)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             db.execute("PRAGMA writable_schema = 1")
             db.execute("DELETE FROM sqlite_master")
@@ -28,11 +28,11 @@ class TestSqliteStore(unittest.TestCase):
             db.execute("VACUUM")
             db.execute("PRAGMA integrity_check")
 
-    def test_get_all_drinks__no_drinks__returns_empty_map(self):
+    def test_get_all_drinks__no_drinks__returns_empty_map(self) -> None:
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
         self.assertEqual(0, len(store.all_drinks()))
 
-    def test_add_order__no_timestamp__uses_current_timestamp(self):
+    def test_add_order__no_timestamp__uses_current_timestamp(self) -> None:
         drink_name = 'tap_beer'
         display_name = 'Tap Beer .4l'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
@@ -46,11 +46,11 @@ class TestSqliteStore(unittest.TestCase):
             timestamp = db.execute("SELECT time FROM PurchaseOrder").fetchone()[0]
             self.assertAlmostEqual(timestamp, int(time.time_ns()) // 1e9, delta=1)
 
-    def test_get_all_layouts__no_layouts__returns_empty_map(self):
+    def test_get_all_layouts__no_layouts__returns_empty_map(self) -> None:
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
         self.assertEqual(0, len(store.all_layouts()))
 
-    def test_get_all_layouts__simple_layout__succeeds(self):
+    def test_get_all_layouts__simple_layout__succeeds(self) -> None:
         drink_name = 'tap_beer'
         display_name = 'Tap Beer .4l'
         layout_name = 'simple_layout'
@@ -65,7 +65,7 @@ class TestSqliteStore(unittest.TestCase):
         self.assertEqual(1, len(layouts))
         self.assertIsInstance(layouts[layout_name].buttons[0][0], OrderButton)
 
-    def test_get_all_layouts__empty_order_button_display_name__uses_drink_name(self):
+    def test_get_all_layouts__empty_order_button_display_name__uses_drink_name(self) -> None:
         drink_name = 'tap_beer'
         display_name = 'Tap Beer .4l'
         layout_name = 'simple_layout'
@@ -79,7 +79,7 @@ class TestSqliteStore(unittest.TestCase):
 
         self.assertEqual(display_name, layouts[layout_name].buttons[0][0].display_name)
 
-    def test_start_event__unfinished_event_exists__raises(self):
+    def test_start_event__unfinished_event_exists__raises(self) -> None:
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             db.execute("INSERT INTO Event DEFAULT VALUES")
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')

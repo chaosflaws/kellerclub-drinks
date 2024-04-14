@@ -38,7 +38,7 @@ def route(environ: WSGIEnvironment) -> Handler:
         return ErrorHandler(400, 'Unsupported HTTP method!')
 
 
-def _get_content(environ: WSGIEnvironment):
+def _get_content(environ: WSGIEnvironment) -> bytes:
     if 'CONTENT_LENGTH' not in environ:
         return b''
 

@@ -99,7 +99,7 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
                     raise e
 
     @staticmethod
-    def _add_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection):
+    def _add_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection) -> None:
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
         sql_template = "INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (?, ?, ?)"
         conn.execute(sql_template, (randomized_timestamp, drink, event_id))

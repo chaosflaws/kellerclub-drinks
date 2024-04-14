@@ -35,7 +35,7 @@ class Settings:
         return Settings._parse_settings(json.loads(json_string))
 
     @staticmethod
-    def _parse_settings(settings_json) -> Settings:
+    def _parse_settings(settings_json: dict[str, Any]) -> Settings:
         data_store_settings = settings_json['datastore']
 
         if 'cacheAge' in settings_json:

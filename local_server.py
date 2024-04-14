@@ -10,7 +10,7 @@ from wsgiref.types import WSGIApplication
 should_exit = Event()
 
 
-def main():
+def main() -> None:
     os.chdir('src')
     sys.path.append('.')
     shutil.copy('../settings.json', 'settings.json')
@@ -44,7 +44,7 @@ def get_compiled_app() -> WSGIApplication:
         return app_globals['application']
 
 
-def start_server():
+def start_server() -> None:
     with make_server('', 8000, get_compiled_app()) as s:
         s.serve_forever()
 

@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
-from typing import Optional, TypeVar, Generic, Callable
+from typing import Optional, TypeVar, Generic, Callable, Any
 from urllib.parse import parse_qs
 
 
 class FormParser:
     """Parser for a query string formatted as HTML form data."""
 
-    def __init__(self, *valid_params: Param):
+    def __init__(self, *valid_params: Param[Any]):
         self.valid_params = valid_params
 
     def parse(self, query: str, /, content_type: Optional[str] = None) -> dict[str, list[str]]:
@@ -66,7 +66,7 @@ class Param(Generic[T]):
 
 
 @dataclass(frozen=True)
-class SingleValueParam(Param, Generic[T]):
+class SingleValueParam(Param[T], Generic[T]):
     """Describes a parameter that can take exactly one value."""
 
     min_values: int = field(default=1, init=False, repr=False)

@@ -101,7 +101,7 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 
     @staticmethod
     def _add_order_with_random_time_delta(drink: str, event_id: datetime,
-                                          conn: PooledMySQLConnection):
+                                          conn: PooledMySQLConnection) -> None:
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
         cursor = conn.cursor()
         cursor.execute(MysqlStore._add_order_with_time_template,
