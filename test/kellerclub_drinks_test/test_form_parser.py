@@ -3,7 +3,7 @@
 
 import unittest
 
-from kellerclub_drinks.form_parser import FormParser, Param
+from kellerclub_drinks.form_parser import FormParser, Param, BooleanParam
 
 
 class TestFormParser(unittest.TestCase):
@@ -57,6 +57,13 @@ class TestFormParser(unittest.TestCase):
     def test_parser__has_allowed_values__values_must_be_in_allowed_values(self) -> None:
         query = 'key=first'
 
-        parser = FormParser(Param('key', 1, 1, allowed=['second']))
+        parser = FormParser(Param('key', 1, 1, allowed={'second'}))
 
         self.assertRaises(ValueError, lambda: parser.parse(query))
+
+    def test_boolean_parser__value_true__is_converted_to_boolean(self) -> None:
+        query = 'key=true'
+
+        parser = FormParser(BooleanParam('key'))
+
+        self.assertEqual({'key': [True]}, parser.parse(query))

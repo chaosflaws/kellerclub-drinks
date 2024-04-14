@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
-from .form_parser import FormParser, Param, SingleValueParam
+from .form_parser import FormParser, Param, SingleValueParam, BooleanParam
 from .handlers.errors.error import ErrorHandler
 from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
@@ -84,8 +84,7 @@ def _route_get(path: str, query: Optional[str]) -> Handler:
 def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
     try:
         parser = FormParser(SingleValueParam('layout', default=['default']),
-                            SingleValueParam('autosubmit', default=['true'],
-                                             allowed=['true', 'false']))
+                            BooleanParam('autosubmit', default=['true']))
         params = parser.parse(query or '')
         return DrinkSelector(event_id, params['layout'][0])
     except ValueError as e:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, TypeVar, Generic, Callable
 from urllib.parse import parse_qs
 
 
@@ -43,12 +43,17 @@ class FormParser:
                     if value not in param.allowed:
                         raise ValueError(f'Value {value} for key {param.key} not '
                                          f'in allowed values ({param.allowed})!')
+            if param.cnv:
+                payload[param.key] = [param.cnv(value) for value in values]
 
         return payload
 
 
+T = TypeVar('T')
+
+
 @dataclass(frozen=True)
-class Param:
+class Param(Generic[T]):
     """Describes a single valid parameter in HTML form data."""
 
     key: str
@@ -56,12 +61,31 @@ class Param:
     max_values: Optional[int] = None
     _: dataclasses.KW_ONLY = None
     default: Optional[list[str]] = None
-    allowed: Optional[list[str]] = None
+    allowed: Optional[set[str]] = None
+    cnv: Optional[Callable[[str], T]] = None
 
 
 @dataclass(frozen=True)
-class SingleValueParam(Param):
+class SingleValueParam(Param, Generic[T]):
     """Describes a parameter that can take exactly one value."""
 
     min_values: int = field(default=1, init=False, repr=False)
     max_values: Optional[int] = field(default=1, init=False, repr=False)
+
+
+def _get_value(val: str) -> bool:
+    normalized = val.strip().lower()
+    if normalized == 'true':
+        return True
+    if normalized == 'false':
+        return False
+    raise ValueError(f'Boolean value {val} is neither "true" nor "false"!')
+
+
+@dataclass(frozen=True)
+class BooleanParam(SingleValueParam[bool]):
+    """Describes a boolean parameter."""
+
+    allowed: set[str] = field(default_factory=lambda: {'true', 'false'},
+                              init=False, repr=False)
+    cnv: Callable[[str], bool] = field(default=_get_value)
