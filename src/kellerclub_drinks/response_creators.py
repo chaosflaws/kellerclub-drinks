@@ -5,10 +5,17 @@ Interface and implementations of response creators.
 import json
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Self
+from typing import Any, Self, Callable
 from wsgiref.types import StartResponse
 
 from kellerclub_drinks.settings import Settings
+
+
+HttpHeader = list[tuple[str, str]]
+
+
+HeaderModifier = Callable[[HttpHeader], HttpHeader]
+
 
 RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
 
@@ -36,16 +43,46 @@ class ResponseCreator(ABC):
         """
 
 
-class RedirectCreator(ResponseCreator):
+class ModifierAwareCreator(ResponseCreator):
+    def __init__(self) -> None:
+        self.modifiers: list[HeaderModifier] = []
+        self._header: HttpHeader = []
+
+    def add_modifier(self, modifier: HeaderModifier) -> None:
+        self.modifiers.append(modifier)
+
+    @property
+    def header(self) -> HttpHeader:
+        return self._header
+
+    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
+        self._header = self._init_header()
+        for modifier in self.modifiers:
+            modifier(self._header)
+        return self._serve(settings, start_response)
+
+    @abstractmethod
+    def _init_header(self) -> HttpHeader:
+        pass
+
+    @abstractmethod
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
+        pass
+
+
+class RedirectCreator(ModifierAwareCreator):
     """Serves an HTTP response containing a generic redirect."""
 
     def __init__(self, new_path: str):
+        super().__init__()
         self.new_path = new_path
 
-    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
+    def _init_header(self) -> HttpHeader:
+        return [('Location', self.new_path)]
+
+    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
         status = _get_status_string(303)
-        response_headers = [('Location', self.new_path)]
-        start_response(status, response_headers)
+        start_response(status, self.header)
         return []
 
 
