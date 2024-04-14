@@ -23,14 +23,17 @@ class DrinkSelector(ResistantHandler):
         return f'/event/{self.event_start}/selector'
 
     def _handle(self, res: Resources) -> ResponseCreator:
+        all_drinks = res.datastore.all_drinks()
         layouts = res.datastore.all_layouts()
         if self.layout_name not in layouts:
             handler = ErrorHandler(404, f'Layout "{self.layout_name}" not found!')
             return handler.handle(res)
 
+        stored_drinks = [all_drinks[name] for name in self.stored_orders if name in all_drinks]
         content = render_template(res.jinjaenv, SELECTOR_TEMPLATE,
                                   self.canonical_url,
                                   event_id=self.event_start,
                                   layout=layouts[self.layout_name],
-                                  autosubmit=self.autosubmit)
+                                  autosubmit=self.autosubmit,
+                                  stored_drinks=stored_drinks)
         return HtmlCreator().with_content(content.encode())

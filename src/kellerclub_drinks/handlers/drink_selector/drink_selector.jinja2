@@ -25,7 +25,12 @@
         {% endfor %}
     </ul>
     {% if not autosubmit %}
-        <div id="order-list"><h1>Bestellungen</h1></div>
+        <div id="order-list">
+            <h1>Bestellungen</h1>
+            {% for drink in stored_drinks %}
+                <li>{{ drink.display_name }}</li>
+            {% endfor %}
+        </div>
     {% endif %}
 </form>
 {% endblock %}
