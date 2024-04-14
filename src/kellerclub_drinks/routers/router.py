@@ -77,19 +77,30 @@ def _route_get(path: str, query: Optional[str], cookie: SimpleCookie) -> Handler
     # event-related URLs
     if (parts := path.split('/'))[1] == 'event':
         if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
-            event_id = datetime.fromtimestamp(int(parts[2]))
-            return _get_drink_selector(event_id, query)
+            event_id = int(parts[2])
+            return _get_drink_selector(event_id, query, cookie)
 
     # give up
     return ErrorHandler(404, f"Unknown GET route {path}!")
 
 
-def _get_drink_selector(event_id: datetime, query: Optional[str]) -> Handler:
+def _get_drink_selector(event_id: int, query: Optional[str],
+                        cookie: SimpleCookie) -> Handler:
+
     try:
         parser = FormParser(SingleValueParam('layout', default=['default']),
                             BooleanParam('autosubmit', default=['true']))
         params = parser.parse(query or '')
-        return DrinkSelector(event_id, params['layout'][0], params['autosubmit'][0])
+        if (morsel := cookie.get(f'event-{event_id}-orders')) is not None:
+            stored_orders = [value
+                             for value in morsel.value.split(',')
+                             if Drink.valid_name(value)]
+        else:
+            stored_orders = []
+        return DrinkSelector(datetime.fromtimestamp(event_id),
+                             params['layout'][0],
+                             params['autosubmit'][0],
+                             stored_orders)
     except ValueError as e:
         return ErrorHandler(400, str(e))
 
