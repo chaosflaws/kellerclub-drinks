@@ -4,7 +4,7 @@ import unittest
 from dataclasses import dataclass
 
 from kellerclub_drinks.handlers.add_drink import AddDrink
-from kellerclub_drinks.handlers.add_order import AddOrder
+from kellerclub_drinks.handlers.submit_order import SubmitOrder
 from kellerclub_drinks.handlers.common_handlers import StaticHandler
 from kellerclub_drinks.handlers.drink_list.drink_list import DrinkList
 from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelector
@@ -49,12 +49,12 @@ class TestRouter(unittest.TestCase):
 
     def test_post_routes(self) -> None:
         route_to_handler: dict[PostRequest, type[Handler]] = {
-            PostRequest('/add_order',
+            PostRequest('/submit_order',
                         'application/x-www-form-urlencoded',
-                        b'order=some_drink&event=100'): AddOrder,
-            PostRequest('/api/add_order',
+                        b'order=some_drink&event=100'): SubmitOrder,
+            PostRequest('/api/submit_order',
                         'application/json',
-                        b'{"order":"some_drink","event":100}'): AddOrder
+                        b'{"order":"some_drink","event":100}'): SubmitOrder
         }
 
         for req, handler in route_to_handler.items():

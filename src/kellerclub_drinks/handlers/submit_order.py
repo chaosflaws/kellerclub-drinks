@@ -6,8 +6,8 @@ from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, Err
     ResponseCreator
 
 
-class AddOrder(ResistantHandler):
-    """Adds a time-stamped drink order to the datastore."""
+class SubmitOrder(ResistantHandler):
+    """Persists a time-stamped drink order in the datastore."""
 
     def __init__(self, drink_name: str, event_id: datetime,
                  source: RequestSource, redirect_url: str):
@@ -18,10 +18,10 @@ class AddOrder(ResistantHandler):
 
     @property
     def canonical_url(self) -> str:
-        return '/add_order'
+        return '/submit_order'
 
     def _handle(self, res: Resources) -> ResponseCreator:
-        res.datastore.add_order(self.event_id, self.drink_name)
+        res.datastore.submit_order(self.event_id, self.drink_name)
 
         match self.source:
             case RequestSource.FORM:

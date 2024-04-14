@@ -86,7 +86,7 @@ class SqliteStore(DataStore):
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def add_order(self, event_id: datetime, drink: str) -> None:
+    def submit_order(self, event_id: datetime, drink: str) -> None:
         with connect(self.path, uri=True) as conn:
             try:
                 conn.execute("PRAGMA foreign_keys = ON;")
@@ -94,12 +94,12 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
                 conn.execute(template, (drink, int(event_id.timestamp())))
             except IntegrityError as e:
                 if e.sqlite_errorname == 'SQLITE_CONSTRAINT_PRIMARYKEY':
-                    self._add_order_with_random_time_delta(drink, event_id, conn)
+                    self._submit_order_with_random_time_delta(drink, event_id, conn)
                 else:
                     raise e
 
     @staticmethod
-    def _add_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection) -> None:
+    def _submit_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection) -> None:
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
         sql_template = "INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (?, ?, ?)"
         conn.execute(sql_template, (randomized_timestamp, drink, event_id))

@@ -32,7 +32,7 @@ class TestSqliteStore(unittest.TestCase):
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
         self.assertEqual(0, len(store.all_drinks()))
 
-    def test_add_order__no_timestamp__uses_current_timestamp(self) -> None:
+    def test_submit_order__no_timestamp__uses_current_timestamp(self) -> None:
         drink_name = 'tap_beer'
         display_name = 'Tap Beer .4l'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
@@ -40,7 +40,7 @@ class TestSqliteStore(unittest.TestCase):
         start_time = datetime.now()
         store.start_event(start_time)
 
-        store.add_order(start_time, drink_name)
+        store.submit_order(start_time, drink_name)
 
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             timestamp = db.execute("SELECT time FROM PurchaseOrder").fetchone()[0]
@@ -58,7 +58,7 @@ class TestSqliteStore(unittest.TestCase):
         store.add_drink(Drink(drink_name, display_name))
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             self._add_layout(db, layout_name)
-            self._add_order_button(db, layout_name, 0, 0, drink_name)
+            self._submit_order_button(db, layout_name, 0, 0, drink_name)
 
         layouts = store.all_layouts()
 
@@ -73,7 +73,7 @@ class TestSqliteStore(unittest.TestCase):
         store.add_drink(Drink(drink_name, display_name))
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             self._add_layout(db, layout_name)
-            self._add_order_button(db, layout_name, 0, 0, drink_name)
+            self._submit_order_button(db, layout_name, 0, 0, drink_name)
 
         layouts = store.all_layouts()
 
@@ -92,7 +92,7 @@ class TestSqliteStore(unittest.TestCase):
         conn.execute(insert_layout_template, (name,))
 
     @staticmethod
-    def _add_order_button(conn: sqlite3.Connection, layout_name: str, xpos: int,
+    def _submit_order_button(conn: sqlite3.Connection, layout_name: str, xpos: int,
                           ypos: int, drink_name: str,
                           display_name: Optional[str] = None) -> None:
         inserted_row_id, = conn.execute(TestSqliteStore._insert_button_template,

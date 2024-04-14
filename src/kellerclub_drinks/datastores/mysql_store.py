@@ -86,7 +86,7 @@ class MysqlStore(DataStore):
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def add_order(self, event_id: datetime, drink: str) -> None:
+    def submit_order(self, event_id: datetime, drink: str) -> None:
         with self.pool.get_connection() as conn:
             cursor: MySQLCursor = conn.cursor()
             try:
@@ -95,20 +95,20 @@ SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
                 conn.commit()
             except IntegrityError as e:
                 if e.errno == 1062:
-                    self._add_order_with_random_time_delta(drink, event_id, conn)
+                    self._submit_order_with_random_time_delta(drink, event_id, conn)
                 else:
                     raise e
 
     @staticmethod
-    def _add_order_with_random_time_delta(drink: str, event_id: datetime,
+    def _submit_order_with_random_time_delta(drink: str, event_id: datetime,
                                           conn: PooledMySQLConnection) -> None:
         randomized_timestamp = _now_plus_random_milliseconds(1_000)
         cursor = conn.cursor()
-        cursor.execute(MysqlStore._add_order_with_time_template,
+        cursor.execute(MysqlStore._submit_order_with_time_template,
                        (randomized_timestamp, drink, event_id))
         conn.commit()
 
-    _add_order_with_time_template = """
+    _submit_order_with_time_template = """
 INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (from_unixtime(%s), %s, %s)
 """
 
