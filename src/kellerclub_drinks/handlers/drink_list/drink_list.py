@@ -16,4 +16,4 @@ class DrinkList(ResistantHandler):
                                   'drink_list/drink_list.jinja2',
                                   self.canonical_url,
                                   drinks=res.datastore.all_drinks())
-        return HtmlCreator().with_content(content.encode())
+        return HtmlCreator(content.encode())

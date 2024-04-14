@@ -36,4 +36,4 @@ class DrinkSelector(ResistantHandler):
                                   layout=layouts[self.layout_name],
                                   autosubmit=self.autosubmit,
                                   stored_drinks=stored_drinks)
-        return HtmlCreator().with_content(content.encode())
+        return HtmlCreator(content.encode())

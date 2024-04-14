@@ -5,16 +5,16 @@ Interface and implementations of response creators.
 import json
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Self, Callable
+from typing import Any, Callable
 from wsgiref.types import StartResponse
 
 from kellerclub_drinks.settings import Settings
 
 
-HttpHeader = list[tuple[str, str]]
+HttpHeader = dict[str, str]
 
 
-HeaderModifier = Callable[[HttpHeader], None]
+HeaderModifier = Callable[[HttpHeader, Settings], None]
 
 
 RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
@@ -43,136 +43,145 @@ class ResponseCreator(ABC):
         """
 
 
-class ModifierAwareCreator(ResponseCreator):
+class ComposableCreator(ResponseCreator, ABC):
     def __init__(self) -> None:
-        self.modifiers: list[HeaderModifier] = []
-        self._header: HttpHeader = []
-
-    def add_modifier(self, modifier: HeaderModifier) -> None:
-        self.modifiers.append(modifier)
+        self._header_modifiers: list[HeaderModifier] = []
 
     @property
-    def header(self) -> HttpHeader:
-        return self._header
+    @abstractmethod
+    def content(self) -> list[bytes]:
+        """Content of the HTTP response."""
+
+    @property
+    @abstractmethod
+    def status_code(self) -> int:
+        """Status code of the HTTP response."""
 
     def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        self._header = self._init_header()
-        for modifier in self.modifiers:
-            modifier(self._header)
-        return self._serve(settings, start_response)
+        headers: dict[str, str] = {}
+        for mod in self._header_modifiers:
+            mod(headers, settings)
 
-    @abstractmethod
-    def _init_header(self) -> HttpHeader:
-        pass
+        start_response(_get_status_string(self.status_code), list(headers.items()))
 
-    @abstractmethod
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        pass
+        return self.content
+
+    def add_header_modifier(self, modifier: HeaderModifier) -> None:
+        self._header_modifiers.append(modifier)
+
+    @staticmethod
+    def _serve_internal_error(start_response: StartResponse, error: str) -> list[bytes]:
+        status = _get_status_string(500)
+        start_response(status, [('Content-type', 'text/plain; charset=utf-8'),
+                                ('Content-Length', str(len(error)))])
+        return [error.encode()]
 
 
-class RedirectCreator(ModifierAwareCreator):
+class LocationModifier:
+    def __init__(self, new_path: str) -> None:
+        self.new_path = new_path
+
+    def __call__(self, header: HttpHeader, settings: Settings) -> None:
+        header['Location'] = self.new_path
+
+
+class CacheControlModifier:
+    def __call__(self, header: HttpHeader, settings: Settings) -> None:
+        header['Cache-Control'] = f'max-age={settings.cache_age}'
+
+
+class ContentHeaderModifier:
+    def __init__(self, content: bytes, content_type: str) -> None:
+        self.content = content
+        self.content_type = content_type
+
+    def __call__(self, header: HttpHeader, settings: Settings) -> None:
+        header['Content-type'] = self.content_type
+        header['Content-Length'] = str(len(self.content))
+
+
+class RedirectCreator(ComposableCreator):
     """Serves an HTTP response containing a generic redirect."""
 
     def __init__(self, new_path: str):
         super().__init__()
-        self.new_path = new_path
+        self.add_header_modifier(LocationModifier(new_path))
 
-    def _init_header(self) -> HttpHeader:
-        return [('Location', self.new_path)]
-
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(303)
-        start_response(status, self.header)
+    @property
+    def content(self) -> list[bytes]:
         return []
 
-
-class CustomContentCreator(ResponseCreator, ABC):
-    """Response creator with a non-empty response body that is supplied by a handler."""
-
-    _content: bytes
-
-    def with_content(self, content: bytes) -> Self:
-        """Content to be served."""
-
-        self._content = content
-
-        return self
-
-    def serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        if self._content is None:
-            raise ValueError("Response creator expected content!")
-
-        return self._serve(settings, start_response)
-
-    @abstractmethod
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        pass
+    @property
+    def status_code(self) -> int:
+        return 303
 
 
-class ErrorCreator(CustomContentCreator):
+class ErrorCreator(ComposableCreator):
     """
     Serves an error page for the given status code, if that status code is
     registered. Otherwise, sends a generic code 400 error message.
     """
 
-    def __init__(self, status_code: int):
-        self.status_code = status_code if 400 <= status_code < 500 else 400
+    def __init__(self, content: bytes, status_code: int) -> None:
+        super().__init__()
+        self._content = content
+        self._status_code = status_code
+        self.add_header_modifier(ContentHeaderModifier(content, 'text/html; charset=utf-8'))
 
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(self.status_code)
-        response_headers = [('Content-type', 'text/html; charset=utf-8'),
-                            ('Content-Length', str(len(self._content)))]
-        start_response(status, response_headers)
+    @property
+    def content(self) -> list[bytes]:
         return [self._content]
 
+    @property
+    def status_code(self) -> int:
+        return self._status_code if 400 <= self._status_code < 500 else 400
 
-class SuccessCreator(CustomContentCreator):
+
+class SuccessCreator(ComposableCreator):
     """Delivers the given content as a successful HTTP response."""
 
-    def __init__(self, content_type: str, use_cache: bool):
-        self.content_type = content_type
-        self.use_cache = use_cache
+    def __init__(self, content: bytes, content_type: str, use_cache: bool) -> None:
+        super().__init__()
+        self._content = content
+        self.add_header_modifier(ContentHeaderModifier(content, content_type))
+        if use_cache:
+            self.add_header_modifier(CacheControlModifier())
 
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(200)
-        cache_control = f'max-age={settings.cache_age}' if self.use_cache else 'no-cache'
-        response_headers = [('Content-type', self.content_type),
-                            ('Content-Length', str(len(self._content))),
-                            ('Cache-Control', cache_control)]
-        start_response(status, response_headers)
+    @property
+    def content(self) -> list[bytes]:
         return [self._content]
+
+    @property
+    def status_code(self) -> int:
+        return 200
 
 
 class StaticCreator(SuccessCreator):
     """Serves static content as cachable content."""
 
-    def __init__(self, content_type: str):
-        super().__init__(content_type, True)
+    def __init__(self, content: bytes, content_type: str):
+        super().__init__(content, content_type, True)
 
 
 class HtmlCreator(SuccessCreator):
     """Serves HTML content as a successful HTTP response."""
-    def __init__(self) -> None:
-        super().__init__('text/html; charset=utf-8', False)
+    def __init__(self, content: bytes) -> None:
+        super().__init__(content, 'text/html; charset=utf-8', False)
 
 
-class AjaxCreator(CustomContentCreator):
+class AjaxCreator(ComposableCreator):
     """Serves an ajax response."""
 
-    def __init__(self, status_code: int):
-        self.status_code = status_code
+    def __init__(self, content: Any, status_code: int):
+        super().__init__()
+        self._content = json.dumps(content).encode()
+        self._status_code = status_code
+        self.add_header_modifier(ContentHeaderModifier(self._content, 'application/json'))
 
-    def with_json_content(self, content: Any) -> None:
-        """
-        Encode the content object as a json string and set it as the response
-        content.
-        """
-
-        self.with_content(json.dumps(content).encode())
-
-    def _serve(self, settings: Settings, start_response: StartResponse) -> list[bytes]:
-        status = _get_status_string(self.status_code)
-        response_headers = [('Content-Type', 'application/json'),
-                            ('Content-Length', str(len(self._content)))]
-        start_response(status, response_headers)
+    @property
+    def content(self) -> list[bytes]:
         return [self._content]
+
+    @property
+    def status_code(self) -> int:
+        return self._status_code

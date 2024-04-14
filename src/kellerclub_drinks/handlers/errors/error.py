@@ -47,7 +47,7 @@ class ErrorHandler(Handler):
             template = res.jinjaenv.get_template(f'errors/{self.status_code}.jinja2')
             content = template.render(message=self.message)
 
-            return ErrorCreator(self.status_code).with_content(content.encode())
+            return ErrorCreator(content.encode(), self.status_code)
         except TemplateError:
             with open('kellerclub_drinks/handlers/errors/400_jinja_error.html', 'rb') as error_file:
-                return ErrorCreator(400).with_content(error_file.read())
+                return ErrorCreator(error_file.read(), 400)

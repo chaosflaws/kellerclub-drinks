@@ -23,7 +23,7 @@ class StaticHandler(ResistantHandler):
             file_path = Path(self.request_path.removeprefix('/'))
             with open(f'kellerclub_drinks/handlers/{file_path}', 'rb') as file:
                 content = file.read()
-            return StaticCreator(self.content_type).with_content(content)
+            return StaticCreator(content, self.content_type)
         except OSError:
             return ErrorHandler(404, f'Static file "{file_path}" not found!').handle(res)
 

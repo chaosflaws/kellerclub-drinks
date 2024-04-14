@@ -27,6 +27,6 @@ class SubmitOrder(ResistantHandler):
             case RequestSource.FORM:
                 return RedirectCreator(self.redirect_url)
             case RequestSource.AJAX:
-                return AjaxCreator(200).with_content(b'')
+                return AjaxCreator(None, 200)
             case _:
-                return ErrorCreator(400)
+                raise ValueError("Unknown RequestSource!")

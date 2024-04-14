@@ -20,4 +20,4 @@ class WelcomeScreen(ResistantHandler):
                                       'welcome_screen/welcome_screen_no_event.jinja2',
                                       self.canonical_url)
 
-        return HtmlCreator().with_content(content.encode())
+        return HtmlCreator(content.encode())
