@@ -8,7 +8,8 @@
 {% endblock %}
 
 {% block main_content %}
-<form id="drink-grid" method="POST" action="/submit_order">
+{% set action = '/submit_order' if autosubmit else '/add_order' %}
+<form id="drink-grid" method="POST" action="{{ action }}">
     <input class="hidden" name="event" value="{{ event_id }}">
     <ul>
         {% for row in layout.buttons %}

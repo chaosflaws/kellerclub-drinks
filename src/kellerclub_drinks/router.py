@@ -6,6 +6,7 @@ from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
 from .form_parser import FormParser, Param, SingleValueParam, BooleanParam
+from .handlers.add_order import AddOrderToClient
 from .handlers.errors.error import ErrorHandler
 from .handlers.add_drink import AddDrink
 from .handlers.drink_list.drink_list import DrinkList
@@ -104,7 +105,9 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
 
     # constant paths
     stripped_path = path.rstrip('/')
-    if stripped_path == '/submit_order':
+    if stripped_path == '/add_order':
+        return AddOrderToClient(referer or '/')
+    elif stripped_path == '/submit_order':
         try:
             parser = FormParser(SingleValueParam('order'),
                                 SingleValueParam('event'))
