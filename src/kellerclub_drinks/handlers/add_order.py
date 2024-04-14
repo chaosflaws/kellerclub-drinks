@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from .errors.error import ResistantHandler
 from ..resources import Resources
 from ..response_creators import ResponseCreator, RedirectCreator
@@ -9,8 +11,10 @@ class AddOrderToClient(ResistantHandler):
     The order must be submitted to be persisted in the database.
     """
 
-    def __init__(self, new_path: str):
-        self.new_path = new_path
+    def __init__(self, drink_name: str, event_id: datetime, redirect_url: str):
+        self.drink_name = drink_name
+        self.event_id = event_id
+        self.new_path = redirect_url
 
     def _handle(self, res: Resources) -> ResponseCreator:
         return RedirectCreator(self.new_path)

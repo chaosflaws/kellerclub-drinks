@@ -14,7 +14,7 @@ from kellerclub_drinks.settings import Settings
 HttpHeader = list[tuple[str, str]]
 
 
-HeaderModifier = Callable[[HttpHeader], HttpHeader]
+HeaderModifier = Callable[[HttpHeader], None]
 
 
 RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])

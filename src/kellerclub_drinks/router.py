@@ -106,7 +106,15 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
     # constant paths
     stripped_path = path.rstrip('/')
     if stripped_path == '/add_order':
-        return AddOrderToClient(referer or '/')
+        try:
+            parser = FormParser(SingleValueParam('order'),
+                                SingleValueParam('event'))
+            parsed_query = parser.parse(content.decode(), content_type=content_type)
+            return AddOrderToClient(parsed_query['order'][0],
+                                    datetime.fromtimestamp(int(parsed_query['event'][0])),
+                                    referer or '/')
+        except ValueError as e:
+            return ErrorHandler(400, str(e))
     elif stripped_path == '/submit_order':
         try:
             parser = FormParser(SingleValueParam('order'),
