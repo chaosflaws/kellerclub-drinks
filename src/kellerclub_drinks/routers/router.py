@@ -2,6 +2,7 @@
 import json
 import re
 from datetime import datetime
+from http.cookies import SimpleCookie
 from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
@@ -30,9 +31,10 @@ def route(environ: WSGIEnvironment) -> Handler:
     query: Optional[str] = environ.get('QUERY_STRING', None)
     content_type: Optional[str] = environ.get('CONTENT_TYPE', None)
     content: bytes = _get_content(environ)
+    cookie = SimpleCookie(environ.get('HTTP_COOKIE', ''))
 
     if method.lower() == 'get':
-        return _route_get(path, query)
+        return _route_get(path, query, cookie)
     elif method.lower() == 'post':
         return _route_post(path, referer, content_type, content)
     else:
@@ -51,7 +53,7 @@ def _get_content(environ: WSGIEnvironment) -> bytes:
     return environ['wsgi.input'].read(content_length)
 
 
-def _route_get(path: str, query: Optional[str]) -> Handler:
+def _route_get(path: str, query: Optional[str], cookie: SimpleCookie) -> Handler:
     # catch the funky stuff
     if not _valid_path(path):
         print(f'Invalid path {path}!')
