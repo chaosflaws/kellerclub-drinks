@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring, missing-class-docstring
+# pylint: disable=missing-function-docstring
+
 from __future__ import annotations
 
 import unittest
