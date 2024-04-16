@@ -1,3 +1,5 @@
+from http.cookies import SimpleCookie
+
 from .errors.error import ResistantHandler
 from ..resources import Resources
 from ..response_creators import ResponseCreator, RedirectCreator, HttpHeader
@@ -27,6 +29,9 @@ class AddOrderToClient(ResistantHandler):
         return '/add_order'
 
     def _add_order_to_cookie(self, header: HttpHeader, _: Settings) -> None:
-        new_orders = self.order_list + [self.drink_name]
-        print(f'event-{self.event_id}-orders={",".join(new_orders)}')
-        header['Set-Cookie'] = f'event-{self.event_id}-orders={",".join(new_orders)}'
+        cookie = SimpleCookie()
+        key = f'event-{self.event_id}-orders'
+        cookie[key] = ','.join(self.order_list + [self.drink_name])
+        cookie[key]['samesite'] = 'Strict'
+        cookie[key]['path'] = '/'
+        header['Set-Cookie'] = cookie.output(header='').strip()
