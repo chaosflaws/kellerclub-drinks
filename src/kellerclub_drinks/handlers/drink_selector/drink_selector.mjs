@@ -23,6 +23,8 @@ if (drinkGrid.dataset.autosubmit === 'true') {
     Error('Parameter "autosubmit" is neither "true" nor "false"!');
 }
 
+displayStoredOrders();
+
 function getEventId() {
     const inputs = drinkGrid.getElementsByTagName('input');
     const eventInput = inputs.namedItem('event');
@@ -41,4 +43,10 @@ async function addOrder(e) {
     e.preventDefault();
     eventOrders.localStorage = [...eventOrders.localStorage, this.value];
     eventOrders.display(orderList, this.value);
+}
+
+function displayStoredOrders() {
+    for (const order of eventOrders.localStorage) {
+        eventOrders.display(orderList, order);
+    }
 }
