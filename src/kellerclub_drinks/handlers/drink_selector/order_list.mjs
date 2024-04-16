@@ -1,14 +1,16 @@
 export default (eventId, drinks) => {
     return {
         get localStorage() {
-            return window.localStorage[keyFor(eventId)]
-                ? window.localStorage[keyFor(eventId)].split(',')
+            return window.localStorage.getItem(keyFor(eventId))
+                ? window.localStorage.getItem(keyFor(eventId)).split(',')
                 : [];
         },
 
         set localStorage(orders) {
-            window.localStorage[keyFor(eventId)] = orders.join(',');
+            window.localStorage.setItem(keyFor(eventId), orders.join(','));
         },
+
+        clear: () => window.localStorage.removeItem(keyFor(eventId)),
 
         display: (target, name) => {
             const displayName = drinks.get(name);

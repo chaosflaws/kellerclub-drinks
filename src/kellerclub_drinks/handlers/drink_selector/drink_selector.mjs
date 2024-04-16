@@ -23,7 +23,17 @@ if (drinkGrid.dataset.autosubmit === 'true') {
     Error('Parameter "autosubmit" is neither "true" nor "false"!');
 }
 
-displayStoredOrders();
+if (drinkGrid.dataset.autosubmit === 'true') {
+    for (const order of eventOrders.localStorage) {
+        fetch('/api/submit_order', {
+            method: 'POST',
+            body: JSON.stringify({'order': order, 'event': eventId})
+        });
+    }
+    eventOrders.clear();
+} else {
+    displayStoredOrders();
+}
 
 function getEventId() {
     const inputs = drinkGrid.getElementsByTagName('input');
