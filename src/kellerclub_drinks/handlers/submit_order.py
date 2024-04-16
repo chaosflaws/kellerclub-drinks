@@ -2,8 +2,8 @@ from datetime import datetime
 
 from .errors.error import ResistantHandler
 from ..resources import Resources
-from ..response_creators import RequestSource, AjaxCreator, RedirectCreator, ErrorCreator, \
-    ResponseCreator
+from ..response_creators import AjaxCreator, RedirectCreator, ResponseCreator
+from ..routers.request_source import RequestSource
 
 
 class SubmitOrder(ResistantHandler):
@@ -29,4 +29,4 @@ class SubmitOrder(ResistantHandler):
             case RequestSource.AJAX:
                 return AjaxCreator(None, 200)
             case _:
-                raise ValueError("Unknown RequestSource!")
+                raise ValueError("Unsupported RequestSource!")

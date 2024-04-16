@@ -4,7 +4,6 @@ Interface and implementations of response creators.
 
 import json
 from abc import ABC, abstractmethod
-from enum import Enum
 from typing import Any, Callable
 from wsgiref.types import StartResponse
 
@@ -15,9 +14,6 @@ HttpHeader = dict[str, str]
 
 
 HeaderModifier = Callable[[HttpHeader, Settings], None]
-
-
-RequestSource = Enum('RequestSource', ['FORM', 'AJAX'])
 
 
 _STATUS_MESSAGES = {

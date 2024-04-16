@@ -7,6 +7,7 @@ from typing import Optional
 from wsgiref.types import WSGIEnvironment
 
 from .form_parser import FormParser, SingleValueParam, BooleanParam
+from .request_source import RequestSource
 from ..handlers.add_order import AddOrderToClient
 from ..handlers.errors.error import ErrorHandler
 from ..handlers.add_drink import AddDrink
@@ -19,7 +20,6 @@ from ..handlers.start_event import StartEvent
 from ..handlers.stop_event import StopEvent
 from ..handlers.welcome_screen.welcome_screen import WelcomeScreen
 from ..model.drinks import Drink
-from ..response_creators import RequestSource
 
 
 def route(environ: WSGIEnvironment) -> Handler:
@@ -64,7 +64,17 @@ def _route_get(path: str, query: Optional[str], cookie: SimpleCookie) -> Handler
     if stripped_path == '':
         return WelcomeScreen()
     elif stripped_path == '/drinks':
-        return DrinkList()
+        return DrinkList(RequestSource.NAV)
+
+    # event-related URLs
+    if (parts := path.split('/'))[1] == 'event':
+        if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
+            event_id = int(parts[2])
+            return _get_drink_selector(event_id, query, cookie)
+
+    # API paths without variables
+    if stripped_path == '/api/drinks':
+        return DrinkList(RequestSource.AJAX)
 
     # paths to static files
     if path.endswith('.css'):
@@ -73,12 +83,6 @@ def _route_get(path: str, query: Optional[str], cookie: SimpleCookie) -> Handler
         return StaticHandler(path, 'text/javascript')
     elif path.endswith('.woff2'):
         return StaticHandler(path, 'font/woff2')
-
-    # event-related URLs
-    if (parts := path.split('/'))[1] == 'event':
-        if len(parts) == 4 and parts[2].isdigit() and parts[3] == 'selector':
-            event_id = int(parts[2])
-            return _get_drink_selector(event_id, query, cookie)
 
     # give up
     return ErrorHandler(404, f"Unknown GET route {path}!")
