@@ -4,12 +4,12 @@
 
 {% block static %}
 <link rel="stylesheet" href="/drink_selector/drink_selector.css">
-<script src="/drink_selector/drink_selector.mjs" defer></script>
+<script type="module" src="/drink_selector/drink_selector.mjs" defer></script>
 {% endblock %}
 
 {% block main_content %}
 {% set action = '/submit_order' if autosubmit else '/add_order' %}
-<form id="drink-grid" method="POST" action="{{ action }}">
+<form id="drink-grid" method="POST" action="{{ action }}" data-autosubmit="{{ autosubmit | string | lower }}">
     <input class="hidden" name="event" value="{{ event_id }}">
     <ul>
         {% for row in layout.buttons %}
