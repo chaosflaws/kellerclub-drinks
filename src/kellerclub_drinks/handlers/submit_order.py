@@ -9,9 +9,9 @@ from ..routers.request_source import RequestSource
 class SubmitOrder(ResistantHandler):
     """Persists a time-stamped drink order in the datastore."""
 
-    def __init__(self, drink_name: str, event_id: datetime,
+    def __init__(self, drink_names: list[str], event_id: datetime,
                  source: RequestSource, redirect_url: str):
-        self.drink_name = drink_name
+        self.drink_names = drink_names
         self.event_id = event_id
         self.source = source
         self.redirect_url = redirect_url
@@ -21,7 +21,7 @@ class SubmitOrder(ResistantHandler):
         return '/submit_order'
 
     def _handle(self, res: Resources) -> ResponseCreator:
-        res.datastore.submit_order(self.event_id, self.drink_name)
+        res.datastore.submit_order(self.event_id, self.drink_names)
 
         match self.source:
             case RequestSource.FORM:

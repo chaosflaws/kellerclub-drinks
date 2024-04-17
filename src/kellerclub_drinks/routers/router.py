@@ -142,7 +142,7 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             parser = FormParser(SingleValueParam('order'),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
-            return SubmitOrder(parsed_query['order'][0],
+            return SubmitOrder([parsed_query['order'][0]],
                                datetime.fromtimestamp(int(parsed_query['event'][0])),
                                RequestSource.FORM, referer or '')
         except ValueError as e:
@@ -166,17 +166,20 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
     if stripped_path == '/api/submit_order':
         try:
             parsed_json = json.loads(content.decode())
-            if 'order' not in parsed_json:
-                return ErrorHandler(400, "Key 'order' not present!")
-            elif not isinstance(parsed_json['order'], str):
-                return ErrorHandler(400, "'order' is not a string!")
+            if 'orders' not in parsed_json:
+                return ErrorHandler(400, "Key 'orders' not present!")
+            elif not isinstance(parsed_json['orders'], list):
+                return ErrorHandler(400, "'orders' is not a string!")
+            elif any(not isinstance(item, str) for item in parsed_json['orders']):
+                msg = f"{parsed_json['orders']} contains an item that is not a string!"
+                return ErrorHandler(400, msg)
             else:
                 if 'event' not in parsed_json:
                     return ErrorHandler(400, "Key 'event' not present!")
                 elif not isinstance(parsed_json['event'], int):
                     return ErrorHandler(400, "'event' is not a number!")
                 else:
-                    return SubmitOrder(parsed_json['order'],
+                    return SubmitOrder(parsed_json['orders'],
                                        datetime.fromtimestamp(parsed_json['event']),
                                        RequestSource.AJAX, referer or '/')
         except ValueError:

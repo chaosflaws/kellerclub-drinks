@@ -13,7 +13,7 @@ CREATE TABLE Event (
 );
 
 CREATE TABLE PurchaseOrder (
-    time NUMERIC NOT NULL DEFAULT(unixepoch('subsec')) PRIMARY KEY,
+    time NUMERIC NOT NULL DEFAULT(unixepoch('subsec')),
     drink_name TEXT NOT NULL
         REFERENCES Drink(name),
     event NUMERIC NOT NULL

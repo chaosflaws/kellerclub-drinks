@@ -1,4 +1,4 @@
-export default (eventId: string, drinks: Map<string, string>, target: HTMLElement | null) => {
+export default (eventId: number, drinks: Map<string, string>, target: HTMLElement | null) => {
     return {
         get localStorage() {
             const value = window.localStorage.getItem(keyFor(eventId));
@@ -22,6 +22,6 @@ export default (eventId: string, drinks: Map<string, string>, target: HTMLElemen
     }
 }
 
-function keyFor(eventId: string) {
+function keyFor(eventId: number) {
     return `event-${eventId}-orders`;
 }

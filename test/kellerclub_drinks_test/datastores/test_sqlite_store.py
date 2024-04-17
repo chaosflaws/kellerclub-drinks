@@ -40,7 +40,7 @@ class TestSqliteStore(unittest.TestCase):
         start_time = datetime.now()
         store.start_event(start_time)
 
-        store.submit_order(start_time, drink_name)
+        store.submit_order(start_time, [drink_name])
 
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             timestamp = db.execute("SELECT time FROM PurchaseOrder").fetchone()[0]

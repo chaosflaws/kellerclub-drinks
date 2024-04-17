@@ -52,8 +52,8 @@ class DrinkSelector(ResistantHandler):
         return creator
 
     def _store_dangling_orders(self, datastore: DataStore):
-        for order in self.stored_orders:
-            datastore.submit_order(self.event_id, order)
+        if self.stored_orders:
+            datastore.submit_order(self.event_id, self.stored_orders)
 
     def _clear_orders_cookie(self, header: HttpHeader, _: Settings) -> None:
         cookie = SimpleCookie()

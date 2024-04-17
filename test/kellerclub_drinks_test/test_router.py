@@ -61,7 +61,7 @@ class TestRouter(unittest.TestCase):
                         b'order=some_drink&event=100'): SubmitOrder,
             PostRequest('/api/submit_order',
                         'application/json',
-                        b'{"order":"some_drink","event":100}'): SubmitOrder
+                        b'{"orders":["some_drink"],"event":100}'): SubmitOrder
         }
 
         for req, handler in route_to_handler.items():

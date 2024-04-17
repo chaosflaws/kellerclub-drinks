@@ -27,10 +27,10 @@ if (drinkGrid.dataset.autosubmit === 'true') {
 }
 
 if (drinkGrid.dataset.autosubmit === 'true') {
-    for (const order of eventOrders.localStorage) {
+    if (eventOrders.localStorage) {
         fetch('/api/submit_order', {
             method: 'POST',
-            body: JSON.stringify({'order': order, 'event': eventId})
+            body: JSON.stringify({'orders': eventOrders.localStorage, 'event': eventId})
         });
     }
     eventOrders.clear();
@@ -43,14 +43,14 @@ function getEventId(drinkGrid: HTMLElement) {
     const eventInput = inputs.namedItem('event');
     if (!eventInput) throw Error('Hidden input with event ID not found!');
 
-    return eventInput.value;
+    return Number(eventInput.value);
 }
 
 function submitOrder(this: HTMLButtonElement, e: Event) {
     e.preventDefault();
     fetch('/api/submit_order', {
         method: 'POST',
-        body: JSON.stringify({'order': this.value, 'event': eventId})
+        body: JSON.stringify({'orders': [this.value], 'event': eventId})
     });
 }
 

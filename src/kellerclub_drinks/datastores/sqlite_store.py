@@ -1,10 +1,10 @@
 import traceback
 from datetime import datetime
 from pathlib import Path
-from sqlite3 import IntegrityError, Error, connect, Connection
+from sqlite3 import Error, connect, Connection
 from typing import Optional
 
-from .datastore import DataStore, _now_plus_random_milliseconds
+from .datastore import DataStore
 from .layout_factory import from_button_rows
 from ..model.drinks import Drink
 from ..model.events import Event
@@ -86,23 +86,20 @@ class SqliteStore(DataStore):
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def submit_order(self, event_id: datetime, drink: str) -> None:
+    def submit_order(self, event_id: datetime, drinks: list[str]) -> list[int]:
+        if not drinks:
+            raise ValueError("Must submit at least one drink!")
         with connect(self.path, uri=True) as conn:
-            try:
-                conn.execute("PRAGMA foreign_keys = ON;")
-                template = "INSERT INTO PurchaseOrder(drink_name, event) VALUES (?, ?)"
-                conn.execute(template, (drink, int(event_id.timestamp())))
-            except IntegrityError as e:
-                if e.sqlite_errorname == 'SQLITE_CONSTRAINT_PRIMARYKEY':
-                    self._submit_order_with_random_time_delta(drink, event_id, conn)
-                else:
-                    raise e
-
-    @staticmethod
-    def _submit_order_with_random_time_delta(drink: str, event_id: datetime, conn: Connection) -> None:
-        randomized_timestamp = _now_plus_random_milliseconds(1_000)
-        sql_template = "INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (?, ?, ?)"
-        conn.execute(sql_template, (randomized_timestamp, drink, event_id))
+            conn.execute("PRAGMA foreign_keys = ON;")
+            template_begin = "INSERT INTO PurchaseOrder(drink_name, event) VALUES "
+            template_params = ",".join("(?, ?)" for _ in drinks)
+            template_end = " RETURNING ROWID"
+            template = template_begin + template_params + template_end
+            params: list[str | int] = []
+            for drink in drinks:
+                params.append(drink)
+                params.append(int(event_id.timestamp()))
+            return [row[0] for row in conn.execute(template, tuple(params)).fetchall()]
 
     def all_layouts(self) -> dict[str, Layout]:
         with connect(self.path, uri=True) as conn:

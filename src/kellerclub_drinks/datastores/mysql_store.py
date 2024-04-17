@@ -2,12 +2,12 @@ import traceback
 from datetime import datetime
 from typing import Optional
 
-from mysql.connector import IntegrityError, Error
+from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
 from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 
 from .layout_factory import from_button_rows
-from ..datastores.datastore import DataStore, _now_plus_random_milliseconds
+from ..datastores.datastore import DataStore
 from ..model.drinks import Drink
 from ..model.events import Event
 from ..model.layouts import Layout
@@ -101,34 +101,24 @@ class MysqlStore(DataStore):
 SELECT start_time, name FROM Event WHERE end_time IS NULL LIMIT 1
 """
 
-    def submit_order(self, event_id: datetime, drink: str) -> None:
+    def submit_order(self, event_id: datetime, drinks: list[str]) -> list[int]:
         conn = self.pool.get_connection()
         try:
             cursor: MySQLCursor = conn.cursor()
-            try:
-                sql_template = "INSERT INTO PurchaseOrder(drink_name, event) VALUES (%s, %s)"
-                cursor.execute(sql_template, (drink, event_id))
-                conn.commit()
-            except IntegrityError as e:
-                if e.errno == 1062:
-                    self._submit_order_with_random_time_delta(drink, event_id, conn)
-                else:
-                    raise e
+            sql_template_begin = "INSERT INTO PurchaseOrder(drink_name, event) VALUES "
+            values = ", ".join('(%s, %s)' for _ in drinks)
+            sql_template_end = " RETURNING id"
+            sql_template = sql_template_begin + values + sql_template_end
+            params: list[str | datetime] = []
+            for drink in drinks:
+                params.append(drink)
+                params.append(event_id)
+            cursor.execute(sql_template, tuple(params))
+            ids = [row[0] for row in cursor.fetchall()]
+            conn.commit()
+            return ids
         finally:
             conn.close()
-
-    @staticmethod
-    def _submit_order_with_random_time_delta(drink: str, event_id: datetime,
-                                          conn: PooledMySQLConnection) -> None:
-        randomized_timestamp = _now_plus_random_milliseconds(1_000)
-        cursor = conn.cursor()
-        cursor.execute(MysqlStore._submit_order_with_time_template,
-                       (randomized_timestamp, drink, event_id))
-        conn.commit()
-
-    _submit_order_with_time_template = """
-INSERT INTO PurchaseOrder(time, drink_name, event) VALUES (from_unixtime(%s), %s, %s)
-"""
 
     def all_layouts(self) -> dict[str, Layout]:
         conn = self.pool.get_connection()
