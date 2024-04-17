@@ -1,0 +1,16 @@
+{
+  "name": "kellerclub-drinks",
+  "version": "1.0.0",
+  "description": "",
+  "devDependencies": {
+    "gulp": "^5.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-shell": "^0.8.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "gulp-concat": "^2.6.1",
+    "merge-stream": "^2.0.0"
+  }
+}
