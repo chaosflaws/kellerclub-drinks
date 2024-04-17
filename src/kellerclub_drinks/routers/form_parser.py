@@ -89,3 +89,14 @@ class BooleanParam(SingleValueParam[bool]):
     allowed: set[str] = field(default_factory=lambda: {'true', 'false'},
                               init=False, repr=False)
     cnv: Callable[[str], bool] = field(default=_get_value)
+
+
+@dataclass(frozen=True)
+class CheckboxParam(Param[bool]):
+    """Describes an encoded HTML form checkbox value."""
+
+    min_values: int = field(default=0, init=False, repr=False)
+    max_values: int = field(default=1, init=False, repr=False)
+    default: list[str] = field(default_factory=lambda: ['off'], init=False, repr=False)
+    allowed: set[str] = field(default_factory=lambda: {'on', 'off'}, init=False, repr=False)
+    cnv: Callable[[str], T] = field(default=lambda val: val == 'on')
