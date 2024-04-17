@@ -1,12 +1,10 @@
-import wsgiref.handlers
 from datetime import datetime
-from http.cookies import SimpleCookie
 
+from .client_order_store import ClientOrderStore
 from ..errors.error import ErrorHandler, ResistantHandler
 from ...datastores.datastore import DataStore
 from ...resources import Resources
-from ...response_creators import HtmlCreator, ResponseCreator, HttpHeader
-from ...settings import Settings
+from ...response_creators import HtmlCreator, ResponseCreator
 from ...templates import render_template
 
 SELECTOR_TEMPLATE = 'drink_selector/drink_selector.jinja2'
@@ -48,18 +46,10 @@ class DrinkSelector(ResistantHandler):
 
         creator = HtmlCreator(content.encode())
         if self.autosubmit:
-            creator.add_header_modifier(self._clear_orders_cookie)
+            modifier = ClientOrderStore(int(self.event_id.timestamp())).clear_orders_cookie
+            creator.add_header_modifier(modifier)
         return creator
 
     def _store_dangling_orders(self, datastore: DataStore):
         if self.stored_orders:
             datastore.submit_order(self.event_id, self.stored_orders)
-
-    def _clear_orders_cookie(self, header: HttpHeader, _: Settings) -> None:
-        cookie = SimpleCookie()
-        key = f'event-{self.event_start}-orders'
-        cookie[key] = ''
-        cookie[key]['samesite'] = 'Strict'
-        cookie[key]['path'] = '/'
-        cookie[key]['expires'] = wsgiref.handlers.format_date_time(0)
-        header['Set-Cookie'] = cookie.output(header='').strip()

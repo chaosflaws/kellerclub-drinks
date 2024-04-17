@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from .drink_selector.client_order_store import ClientOrderStore
 from .errors.error import ResistantHandler
 from ..resources import Resources
 from ..response_creators import AjaxCreator, RedirectCreator, ResponseCreator
@@ -25,7 +26,10 @@ class SubmitOrder(ResistantHandler):
 
         match self.source:
             case RequestSource.FORM:
-                return RedirectCreator(self.redirect_url)
+                creator = RedirectCreator(self.redirect_url)
+                modifier = ClientOrderStore(int(self.event_id.timestamp())).clear_orders_cookie
+                creator.add_header_modifier(modifier)
+                return creator
             case RequestSource.AJAX:
                 return AjaxCreator(None, 200)
             case _:
