@@ -1,4 +1,4 @@
-const {copyFile} = require('node:fs/promises');
+const {copyFile, utimes} = require('node:fs/promises');
 const {exec} = require('child_process');
 const {Transform} = require('stream');
 const {src, dest, parallel, series, watch} = require('gulp');
@@ -9,6 +9,11 @@ const ts = require('gulp-typescript');
 function copyPython() {
     return src(['src/**/*.py', 'src/app.wsgi'])
         .pipe(dest('build/'));
+}
+
+function touchWsgi() {
+    const now = new Date();
+    return utimes('src/app.wsgi', now, now);
 }
 
 function copyTemplates() {
@@ -68,7 +73,7 @@ function testPython() {
 }
 
 function _watch() {
-    watch('src/**/*.py', parallel(testPython, copyPython));
+    watch('src/**/*.py', parallel(testPython, copyPython, touchWsgi));
     watch('src/app.wsgi', parallel(testPython, copyPython));
     watch('test/**/*.py', testPython);
 
