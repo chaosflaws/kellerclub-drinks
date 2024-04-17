@@ -4,7 +4,8 @@
     gap: 1rem;
 }
 
-#drink-grid ul {
+#drink-grid .grid {
+    height: 100%;
     max-width: 100ex;
     max-height: 50em;
 
@@ -31,7 +32,7 @@
     font-size: .75em;
 }
 
-#drink-grid button {
+#drink-grid .grid button {
     background: none;
     font-family: system-ui, sans-serif;
 }

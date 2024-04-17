@@ -4,11 +4,13 @@ import re
 from datetime import datetime
 from http.cookies import SimpleCookie
 from typing import Optional
+from urllib.parse import urlparse
 from wsgiref.types import WSGIEnvironment
 
-from .form_parser import FormParser, SingleValueParam, BooleanParam
+from .form_parser import FormParser, SingleValueParam, BooleanParam, CheckboxParam
 from .request_source import RequestSource
 from ..handlers.add_order import AddOrderToClient
+from ..handlers.drink_selector.settings import DrinkSelectorSettings
 from ..handlers.errors.error import ErrorHandler
 from ..handlers.add_drink import AddDrink
 from ..handlers.drink_list.drink_list import DrinkList
@@ -161,6 +163,11 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
         return StartEvent()
     elif stripped_path == '/stop_event':
         return StopEvent()
+    elif stripped_path == '/drink_selector_settings':
+        parser = FormParser(CheckboxParam('autosubmit'))
+        parsed_query = parser.parse(content.decode(), content_type=content_type)
+        referer_url = urlparse(referer)
+        return DrinkSelectorSettings(parsed_query['autosubmit'][0], referer_url)
 
     # constant API paths
     if stripped_path == '/api/submit_order':

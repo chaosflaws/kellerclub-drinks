@@ -5,7 +5,9 @@ if (!drinkGrid) throw Error('No drink grid element found!');
 
 const orderList = document.getElementById('order-list');
 
-const buttons = drinkGrid.getElementsByTagName('button');
+const buttons = drinkGrid
+    .getElementsByClassName('grid')[0]
+    .getElementsByTagName('button');
 
 const drinks = fetch('/api/drinks')
     .then(response => response.json(), () => Error('Could not fetch drinks!'))

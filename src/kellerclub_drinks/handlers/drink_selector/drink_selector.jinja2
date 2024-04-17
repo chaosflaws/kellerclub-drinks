@@ -11,22 +11,30 @@
 
 {% block main_content %}
 {% set action = '/submit_order' if autosubmit else '/add_order' %}
-<form id="drink-grid" method="POST" action="{{ action }}" data-autosubmit="{{ autosubmit | string | lower }}">
-    <input class="hidden" name="event" value="{{ event_id }}">
-    <ul>
-        {% for row in layout.buttons %}
-            {% for button in row %}
-                {% if button is none %}
-                    <li></li>
-                {% elif button.is_order_button %}
-                    <li><button type="submit" name="order" value="{{ button.drink_name }}">{{ button.display_name }}</button></li>
-                {% elif button.is_link %}
-                    <li><a href="?layout={{ button.layout }}"><i class="bi-folder"></i>{{ button.display_name }}</a></li>
-                {% endif %}
+<div id="drink-grid">
+    <form method="POST" action="{{ action }}">
+        <input class="hidden" name="event" value="{{ event_id }}">
+        <ul class="grid">
+            {% for row in layout.buttons %}
+                {% for button in row %}
+                    {% if button is none %}
+                        <li></li>
+                    {% elif button.is_order_button %}
+                        <li><button type="submit" name="order" value="{{ button.drink_name }}">{{ button.display_name }}</button></li>
+                    {% elif button.is_link %}
+                        <li><a href="?layout={{ button.layout }}"><i class="bi-folder"></i>{{ button.display_name }}</a></li>
+                    {% endif %}
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-    </ul>
-    {% if not autosubmit %}
+        </ul>
+    </form>
+    <div class="sidebar">
+        <form id="settings" method="POST" action="/drink_selector_settings">
+            <input type="checkbox" name="autosubmit" id="autosubmit" {{ 'checked' if autosubmit else '' }}>
+            <label for="autosubmit">Automatisch eintragen</label>
+            <button type="submit" value="">Einstellungen speichern</button>
+        </form>
+        {% if not autosubmit %}
         <div id="order-list">
             <h1>Bestellungen</h1>
             {% for drink in stored_drinks %}
@@ -34,5 +42,6 @@
             {% endfor %}
         </div>
     {% endif %}
-</form>
+    </div>
+</div>
 {% endblock %}
