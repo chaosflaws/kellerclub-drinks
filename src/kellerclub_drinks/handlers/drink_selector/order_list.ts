@@ -1,4 +1,4 @@
-export default (eventId: string, drinks: Map<string, string>, target: HTMLElement) => {
+export default (eventId: string, drinks: Map<string, string>, target: HTMLElement | null) => {
     return {
         get localStorage() {
             const value = window.localStorage.getItem(keyFor(eventId));
@@ -17,7 +17,7 @@ export default (eventId: string, drinks: Map<string, string>, target: HTMLElemen
 
             const orderNode = document.createElement('li');
             orderNode.appendChild(document.createTextNode(displayName));
-            target.appendChild(orderNode);
+            target?.appendChild(orderNode);
         }
     }
 }

@@ -4,7 +4,6 @@ const drinkGrid = document.getElementById('drink-grid');
 if (!drinkGrid) throw Error('No drink grid element found!');
 
 const orderList = document.getElementById('order-list');
-if (!orderList) throw Error('No order list element found!');
 
 const buttons = drinkGrid.getElementsByTagName('button');
 
