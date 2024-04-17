@@ -1,6 +1,5 @@
-const {copyFile, utimes} = require('node:fs/promises');
+const {copyFile, readFile, writeFile, utimes} = require('node:fs/promises');
 const {exec} = require('child_process');
-const {Transform} = require('stream');
 const {src, dest, parallel, series, watch} = require('gulp');
 const concat = require('gulp-concat');
 const cleanCss = require('gulp-clean-css');
@@ -29,22 +28,15 @@ function copyBinStatic() {
 }
 
 function modifyBaseTemplate() {
-    return src('src/kellerclub_drinks/handlers/base.jinja2')
-        .pipe(ReplaceCssBlockTransform)
-        .pipe(dest('build/kellerclub_drinks/handlers'))
-}
-
-const ReplaceCssBlockTransform = new Transform({
-    transform(chunk, encoding, callback) {
-        const fileContent = chunk.contents.toString();
-        const replaced = fileContent
+    const infile = 'src/kellerclub_drinks/handlers/base.jinja2';
+    const outfile = 'build/kellerclub_drinks/handlers/base.jinja2';
+    return readFile(infile)
+        .then(content => content
+            .toString()
             .replace('{% block css %}{% endblock %}', '')
-            .replace('<link rel="stylesheet" href="/base.css">', '<link rel="stylesheet" href="/style.css">');
-        chunk.contents = Buffer.from(replaced);
-        callback(null, chunk);
-    },
-    objectMode: true
-})
+            .replace('<link rel="stylesheet" href="/base.css">', '<link rel="stylesheet" href="/style.css">'))
+        .then(result => writeFile(outfile, result));
+}
 
 function minCss() {
     return src('src/**/*.css')
@@ -78,7 +70,7 @@ function _watch() {
     watch('test/**/*.py', testPython);
 
     watch('src/**/*.jinja2', series(copyTemplates, modifyBaseTemplate));
-    watch('src/**/*.woff2', series(copyBinStatic));
+    watch('src/**/*.woff2', copyBinStatic);
     watch('src/**/*.css', minCss);
     watch('src/**/*.ts', series(transpileTs, copyJs));
 }
