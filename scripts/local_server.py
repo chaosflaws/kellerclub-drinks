@@ -11,9 +11,9 @@ should_exit = Event()
 
 
 def main() -> None:
-    os.chdir('src')
+    os.chdir(os.path.dirname(__file__) + '/../src')
     sys.path.append('.')
-    shutil.copy('../settings.json', 'settings.json')
+    shutil.copy('../scripts/settings.json', 'settings.json')
 
     proc = None
     try:
