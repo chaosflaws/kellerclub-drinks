@@ -27,7 +27,7 @@ if (drinkGrid.dataset.autosubmit === 'true') {
 }
 
 if (drinkGrid.dataset.autosubmit === 'true') {
-    if (eventOrders.localStorage) {
+    if (eventOrders.localStorage.length) {
         fetch('/api/submit_order', {
             method: 'POST',
             body: JSON.stringify({'orders': eventOrders.localStorage, 'event': eventId})
