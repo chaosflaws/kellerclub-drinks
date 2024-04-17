@@ -68,15 +68,12 @@ function testPython() {
 }
 
 function _watch() {
-    watch('src/**/*.py', testPython);
-    watch('src/app.wsgi', testPython);
+    watch('src/**/*.py', parallel(testPython, copyPython));
+    watch('src/app.wsgi', parallel(testPython, copyPython));
     watch('test/**/*.py', testPython);
 
-    watch('src/**/*.py', copyPython);
-    watch('src/app.wsgi', copyPython);
-
     watch('src/**/*.jinja2', series(copyTemplates, modifyBaseTemplate));
-    watch('src/**/*.woff2', copyBinStatic);
+    watch('src/**/*.woff2', series(copyBinStatic));
     watch('src/**/*.css', minCss);
     watch('src/**/*.ts', series(transpileTs, copyJs));
 }
