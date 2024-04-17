@@ -1,7 +1,7 @@
 {
   "datastore": {
     "type": "sqlite",
-    "path": "../scripts/db.sqlite"
+    "path": "../db.sqlite"
   },
   "cacheAge": 0
 }
