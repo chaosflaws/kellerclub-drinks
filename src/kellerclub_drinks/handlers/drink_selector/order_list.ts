@@ -1,9 +1,8 @@
-export default (eventId, drinks) => {
+export default (eventId: string, drinks: Map<string, string>, target: HTMLElement) => {
     return {
         get localStorage() {
-            return window.localStorage.getItem(keyFor(eventId))
-                ? window.localStorage.getItem(keyFor(eventId)).split(',')
-                : [];
+            const value = window.localStorage.getItem(keyFor(eventId));
+            return value ? value.split(',') : [];
         },
 
         set localStorage(orders) {
@@ -12,8 +11,10 @@ export default (eventId, drinks) => {
 
         clear: () => window.localStorage.removeItem(keyFor(eventId)),
 
-        display: (target, name) => {
+        display: (name: string) => {
             const displayName = drinks.get(name);
+            if (!displayName) throw Error(`Unknown drink internal name ${name}!`)
+
             const orderNode = document.createElement('li');
             orderNode.appendChild(document.createTextNode(displayName));
             target.appendChild(orderNode);
@@ -21,6 +22,6 @@ export default (eventId, drinks) => {
     }
 }
 
-function keyFor(eventId) {
+function keyFor(eventId: string) {
     return `event-${eventId}-orders`;
 }

@@ -79,7 +79,7 @@ def _route_get(path: str, query: Optional[str], cookie: SimpleCookie) -> Handler
     # paths to static files
     if path.endswith('.css'):
         return StaticHandler(path, 'text/css')
-    elif path.endswith('.js') or path.endswith('.mjs'):
+    elif path.endswith('.js'):
         return StaticHandler(path, 'text/javascript')
     elif path.endswith('.woff2'):
         return StaticHandler(path, 'font/woff2')

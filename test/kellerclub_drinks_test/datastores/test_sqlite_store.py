@@ -15,7 +15,7 @@ from kellerclub_drinks.model.layouts import OrderButton
 class TestSqliteStore(unittest.TestCase):
     def setUp(self) -> None:
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
-            with open('../src/init-sqlite3.sql', 'r', encoding='utf8') as sql_file:
+            with open('scripts/init-sqlite3.sql', 'r', encoding='utf8') as sql_file:
                 sql = sql_file.read()
                 db.executescript(sql)
 

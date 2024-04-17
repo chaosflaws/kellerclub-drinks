@@ -2,9 +2,11 @@
 
 {% block title %}Getränke-Auswahl{% endblock %}
 
-{% block static %}
+{% block css %}
 <link rel="stylesheet" href="/drink_selector/drink_selector.css">
-<script type="module" src="/drink_selector/drink_selector.mjs" defer></script>
+{% endblock %}
+{% block js %}
+<script type="module" src="/drink_selector/drink_selector.js" defer></script>
 {% endblock %}
 
 {% block main_content %}
