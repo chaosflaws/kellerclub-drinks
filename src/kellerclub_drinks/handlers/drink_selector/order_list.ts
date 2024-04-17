@@ -17,7 +17,7 @@ export default (eventId: number, drinks: Map<string, string>, target: HTMLElemen
 
             const orderNode = document.createElement('li');
             orderNode.appendChild(document.createTextNode(displayName));
-            target?.appendChild(orderNode);
+            target?.insertBefore(orderNode, target?.childNodes[target?.childNodes.length-2]);
         }
     }
 }

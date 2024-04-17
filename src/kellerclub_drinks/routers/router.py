@@ -7,7 +7,7 @@ from typing import Optional
 from urllib.parse import urlparse
 from wsgiref.types import WSGIEnvironment
 
-from .form_parser import FormParser, SingleValueParam, BooleanParam, CheckboxParam
+from .form_parser import FormParser, SingleValueParam, BooleanParam, CheckboxParam, Param
 from .request_source import RequestSource
 from ..handlers.add_order import AddOrderToClient
 from ..handlers.drink_selector.settings import DrinkSelectorSettings
@@ -141,10 +141,10 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             return ErrorHandler(400, str(e))
     elif stripped_path == '/submit_order':
         try:
-            parser = FormParser(SingleValueParam('order'),
+            parser = FormParser(Param('order', 1),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
-            return SubmitOrder([parsed_query['order'][0]],
+            return SubmitOrder(parsed_query['order'],
                                datetime.fromtimestamp(int(parsed_query['event'][0])),
                                RequestSource.FORM, referer or '')
         except ValueError as e:

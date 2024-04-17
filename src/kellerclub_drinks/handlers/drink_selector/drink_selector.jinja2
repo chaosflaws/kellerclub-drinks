@@ -10,8 +10,8 @@
 {% endblock %}
 
 {% block main_content %}
-{% set action = '/submit_order' if autosubmit else '/add_order' %}
-<div id="drink-grid">
+{% set action = '/submit_order?autosubmit=true' if autosubmit else '/add_order' %}
+<div id="drink-grid" data-autosubmit="{{ autosubmit | string | lower }}">
     <form method="POST" action="{{ action }}">
         <input class="hidden" name="event" value="{{ event_id }}">
         <ul class="grid">
@@ -22,7 +22,9 @@
                     {% elif button.is_order_button %}
                         <li><button type="submit" name="order" value="{{ button.drink_name }}">{{ button.display_name }}</button></li>
                     {% elif button.is_link %}
-                        <li><a href="?layout={{ button.layout }}"><i class="bi-folder"></i>{{ button.display_name }}</a></li>
+                        <li><a href="?layout={{ button.layout }}{{ '' if autosubmit else '&autosubmit=false' }}">
+                            <i class="bi-folder"></i>{{ button.display_name }}
+                        </a></li>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
@@ -35,13 +37,18 @@
             <button type="submit" value="">Einstellungen speichern</button>
         </form>
         {% if not autosubmit %}
-        <div id="order-list">
-            <h1>Bestellungen</h1>
-            {% for drink in stored_drinks %}
-                <li>{{ drink.display_name }}</li>
-            {% endfor %}
-        </div>
-    {% endif %}
+            <form method="POST" action="/submit_order?autosubmit=false">
+                <div id="order-list">
+                    <h1>Bestellungen</h1>
+                    <input class="hidden" name="event" value="{{ event_id }}">
+                    {% for drink in stored_drinks %}
+                        <li>{{ drink.display_name }}</li>
+                        <input class="hidden" name="order" value="{{ drink.name }}">
+                    {% endfor %}
+                    <button>Eintragen</button>
+                </div>
+            </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

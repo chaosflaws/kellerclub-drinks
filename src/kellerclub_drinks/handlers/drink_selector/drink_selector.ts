@@ -5,7 +5,7 @@ if (!drinkGrid) throw Error('No drink grid element found!');
 
 const orderList = document.getElementById('order-list');
 
-const buttons = drinkGrid
+const gridButtons = drinkGrid
     .getElementsByClassName('grid')[0]
     .getElementsByTagName('button');
 
@@ -17,13 +17,17 @@ const eventId = getEventId(drinkGrid);
 const eventOrders = orders(eventId, await drinks, orderList);
 
 if (drinkGrid.dataset.autosubmit === 'true') {
-    for (const button of buttons) {
-        button.addEventListener('click', submitOrder);
+    for (const button of gridButtons) {
+        button.addEventListener('click', submitOrderFromGrid);
     }
 } else if (drinkGrid.dataset.autosubmit === 'false') {
-    for (const button of buttons) {
+    for (const button of gridButtons) {
         button.addEventListener('click', addOrder);
     }
+    const submitButton = orderList
+        ?.getElementsByTagName('button')[0];
+    if (!submitButton) throw Error('Autosubmit is false, but no submit button found!');
+    submitButton.addEventListener('click', submitOrderList);
 } else {
     throw Error('Parameter "autosubmit" is neither "true" nor "false"!');
 }
@@ -33,9 +37,8 @@ if (drinkGrid.dataset.autosubmit === 'true') {
         fetch('/api/submit_order', {
             method: 'POST',
             body: JSON.stringify({'orders': eventOrders.localStorage, 'event': eventId})
-        });
+        }).then(() => eventOrders.clear());
     }
-    eventOrders.clear();
 } else {
     displayStoredOrders();
 }
@@ -48,11 +51,25 @@ function getEventId(drinkGrid: HTMLElement) {
     return Number(eventInput.value);
 }
 
-function submitOrder(this: HTMLButtonElement, e: Event) {
+function submitOrderFromGrid(this: HTMLButtonElement, e: Event) {
     e.preventDefault();
     fetch('/api/submit_order', {
         method: 'POST',
         body: JSON.stringify({'orders': [this.value], 'event': eventId})
+    });
+}
+
+function submitOrderList(this: HTMLButtonElement, e: Event) {
+    e.preventDefault();
+    fetch('/api/submit_order', {
+        method: 'POST',
+        body: JSON.stringify({'orders': eventOrders.localStorage, 'event': eventId})
+    }).then(() => {
+        eventOrders.clear();
+        const displayedItems = this.parentElement?.getElementsByTagName('li');
+        for (const elem of Array.from(displayedItems ?? [])) {
+            elem.remove();
+        }
     });
 }
 
