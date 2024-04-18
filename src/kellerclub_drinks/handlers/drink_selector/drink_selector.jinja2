@@ -6,13 +6,14 @@
 <link rel="stylesheet" href="/drink_selector/drink_selector.css">
 {% endblock %}
 {% block js %}
-<script type="module" src="/drink_selector/drink_selector.js" defer></script>
+{% set script = 'autosubmit' if autosubmit else 'manual_submit' %}
+<script type="module" src="/drink_selector/{{ script }}.js" defer></script>
 {% endblock %}
 
 {% block main_content %}
-{% set action = '/submit_order?autosubmit=true' if autosubmit else '/add_order' %}
+{% set action = '/submit_order' if autosubmit else '/add_order' %}
 <div id="drink-grid" data-autosubmit="{{ autosubmit | string | lower }}">
-    <form method="POST" action="{{ action }}">
+    <form class="grid-form" method="POST" action="{{ action }}">
         <input class="hidden" name="event" value="{{ event_id }}">
         <ul class="grid">
             {% for row in layout.buttons %}
@@ -38,13 +39,16 @@
         </form>
         {% if not autosubmit %}
             <form method="POST" action="/submit_order?autosubmit=false">
-                <div id="order-list">
+                <div class="order-list">
                     <h1>Bestellungen</h1>
                     <input class="hidden" name="event" value="{{ event_id }}">
-                    {% for drink in stored_drinks %}
-                        <li>{{ drink.display_name }}</li>
-                        <input class="hidden" name="order" value="{{ drink.name }}">
-                    {% endfor %}
+                    <ul>
+                        {% for drink in stored_drinks %}
+                        <li>
+                            {{ drink.display_name }}
+                            <input class="hidden" name="order" value="{{ drink.name }}"></li>
+                        {% endfor %}
+                    </ul>
                     <button>Eintragen</button>
                 </div>
             </form>

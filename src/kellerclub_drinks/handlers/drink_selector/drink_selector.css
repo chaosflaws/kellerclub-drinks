@@ -17,11 +17,11 @@
     padding: 0;
 }
 
-#drink-grid li {
+#drink-grid .grid li {
     display: flex;
 }
 
-#drink-grid li > * {
+#drink-grid .grid li > * {
     flex-grow: 1;
     cursor: pointer;
     touch-action: manipulation;
@@ -37,7 +37,7 @@
     font-family: system-ui, sans-serif;
 }
 
-#drink-grid a {
+#drink-grid .grid a {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -49,24 +49,24 @@
     text-decoration: none;
 }
 
-#order-list {
+#drink-grid .order-list {
     max-width: 30ex;
 }
 
-#order-list h1 {
+#drink-grid .order-list h1 {
     margin-top: 0;
 }
 
 @media (width >= 131ex) {
-    #drink-grid {
+    #drink-grid .grid {
         flex-wrap: nowrap;
     }
 
-    #drink-grid ul {
+    #drink-grid .grid {
         gap: .5rem;
     }
 
-    #drink-grid li > * {
+    #drink-grid .grid li > * {
         padding: 1em;
 
         font-size: 1em;
