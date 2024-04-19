@@ -4,6 +4,7 @@ const {src, dest, parallel, series, watch} = require('gulp');
 const concat = require('gulp-concat');
 const cleanCss = require('gulp-clean-css');
 const ts = require('gulp-typescript');
+const eslint = require('gulp-eslint-new');
 
 function copyPython() {
     return src(['src/**/*.py', 'src/app.wsgi'])
@@ -64,6 +65,12 @@ function testPython() {
     return exec(cmd, {env});
 }
 
+function tsLint() {
+    return tsProject.src()
+        .pipe(eslint({configType: 'flat', overrideConfigFile: 'eslint.config.mjs'}))
+        .pipe(eslint.format());
+}
+
 function _watch() {
     watch('src/**/*.py', parallel(testPython, copyPython, touchWsgi));
     watch('src/app.wsgi', parallel(testPython, copyPython));
@@ -72,7 +79,7 @@ function _watch() {
     watch('src/**/*.jinja2', series(copyTemplates, modifyBaseTemplate));
     watch('src/**/*.woff2', copyBinStatic);
     watch('src/**/*.css', minCss);
-    watch('src/**/*.ts', series(transpileTs, copyJs));
+    watch('src/**/*.ts', parallel(tsLint, series(transpileTs, copyJs)));
 }
 
 function serve() {
@@ -80,7 +87,7 @@ function serve() {
 }
 
 const _default = series(
-    testPython,
+    parallel(testPython, tsLint),
     parallel(
         copyPython,
         series(copyTemplates, copyBinStatic, modifyBaseTemplate),
