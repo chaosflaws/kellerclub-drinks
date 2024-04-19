@@ -16,8 +16,8 @@ export function Query<T extends Element>(nodes: T): SingleQuery<T>;
 export function Query<T extends Element>(nodes: T[]): MultiQuery<T>;
 export function Query(nodes?: Element | Element[]) {
     if (!nodes) return new SingleQuery<HTMLElement>('[root]');
-    if (nodes instanceof Element) return new SingleQuery(`${nodes.tagName}[#${nodes.id}]`, nodes);
-    else return new MultiQuery(nodes.map(node => `${node.tagName}[#${node.id}]`).join(','), nodes);
+    if (nodes instanceof Element) return new SingleQuery(nodeToStr(nodes), nodes);
+    else return new MultiQuery(nodes.map(node => nodeToStr(node)).join(','), nodes);
 }
 
 class SingleQuery<T extends Element> implements Query<Element> {
@@ -41,7 +41,7 @@ class SingleQuery<T extends Element> implements Query<Element> {
         const result = document.getElementById(id);
         if (result && this.#node.contains(result))
             return new SingleQuery<HTMLElement>(this.#path + `[childWithId=${id}]`, result);
-        else throw err(this, `ID ${id} does not exist or is not a child of ${this.#node}!`);
+        else throw err(this, `ID ${id} does not exist or is not a child of ${nodeToStr(this.#node)}!`);
     }
 
     oneName(name: string) {
@@ -51,12 +51,12 @@ class SingleQuery<T extends Element> implements Query<Element> {
     private _oneName(name: string, path: string) {
         const result = this.#node.querySelector(`[name=${name}]`);
         if (result) return new SingleQuery(path, result);
-        else throw err(this, `${name} does not appear as name attribute of a child of ${this.#node}!`);
+        else throw err(this, `${name} does not appear as name attribute of a child of ${nodeToStr(this.#node)}!`);
     }
 
     withName(name: string) {
         if (this.#node.getAttribute('name') != name)
-            throw err(this, `${this.#node} does not have name ${name}!`);
+            throw err(this, `${nodeToStr(this.#node)} does not have name ${name}!`);
         return new SingleQuery(this.#path + `[withName=${name}]`, this.#node);
     }
 
@@ -68,7 +68,7 @@ class SingleQuery<T extends Element> implements Query<Element> {
         const result = this.#node.getElementsByClassName(className);
         if (result.length == 1)
             return new SingleQuery(this.#path + `[oneClass=${className}]`, result[0]);
-        else throw err(this, `${className} is not a unique class name below ${this.#node}!`);
+        else throw err(this, `${className} is not a unique class name below ${nodeToStr(this.#node)}!`);
     }
 
     someClasses(className: string) {
@@ -82,14 +82,14 @@ class SingleQuery<T extends Element> implements Query<Element> {
         const result = this.#node.getElementsByTagName(tag);
         if (result.length == 1)
             return new SingleQuery(this.#path + `[oneTag=${tag}]`, result[0]);
-        else throw err(this, `${tag} is not a unique element below ${this.#node}!`);
+        else throw err(this, `${tag} is not a unique element below ${nodeToStr(this.#node)}!`);
     }
 
     someTags<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {
         const result = this.#node.getElementsByTagName(tag);
         if (result.length >= 1)
             return new MultiQuery(this.#path + `[someTags=${tag}]`, [...result]);
-        else throw err(this, `${tag} not present below ${this.#node}!`);
+        else throw err(this, `${tag} not present below ${nodeToStr(this.#node)}!`);
     }
 }
 
@@ -98,7 +98,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
     readonly #path: string;
 
     constructor(path: string, nodes: T[]) {
-        this.#nodes = nodes as T[];
+        this.#nodes = nodes;
         this.#path = path;
     }
 
@@ -113,7 +113,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
     childWithId(id: string): Query<Element> {
         const result = document.getElementById(id);
         if (result && this.#nodes.some(node => node.contains(result))) return new SingleQuery(this.#path + `[childWithId=${id}]`, result);
-        else throw err(this, `ID ${id} not  found below some node in ${this.#nodes}!`);
+        else throw err(this, `ID ${id} not  found below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     oneName(name: string) {
@@ -122,7 +122,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .filter(node => node == null) as Element[];
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[oneName=${name}]`, result);
-        else throw err(this, `No name attribute ${name} below some node in ${this.#nodes}!`);
+        else throw err(this, `No name attribute ${name} below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     withName(name: string) {
@@ -130,7 +130,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .filter(node => node.getAttribute('name') == name);
 
         if (result.length == 1) return new SingleQuery(this.#path + `[withName=${name}]`, result[0]);
-        else throw err(this, `${result.length == 0 ? 'No node' : 'More than one node'} in ${this.#nodes} has name ${name}!`);
+        else throw err(this, `${result.length == 0 ? 'No node' : 'More than one node'} in ${this.#nodes.map(node => nodeToStr(node)).join(',')} has name ${name}!`);
     }
 
     childWithName(name: string) {
@@ -139,7 +139,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .filter(node => node == null) as Element[];
 
         if (result.length == 1) return new SingleQuery(this.#path + `[childWithName=${name}]`, result[0]);
-        else throw err(this, `${name} is not unique in the children of ${this.#nodes}!`);
+        else throw err(this, `${name} is not unique in the children of ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     oneClass(className: string) {
@@ -149,7 +149,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .map(elements => elements[0]);
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[oneClass=${className}]`, result);
-        else throw err(this, `${className} is not a unique class name below some node in ${this.#nodes}!`);
+        else throw err(this, `${className} is not a unique class name below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     someClasses(className: string) {
@@ -159,7 +159,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .map(elements => elements[0]);
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[someClasses=${className}]`, result);
-        else throw err(this, `${className} not always present on ${this.#nodes}!`);
+        else throw err(this, `${className} not always present on ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     oneTag<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {
@@ -169,7 +169,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .map(elements => elements[0]);
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[oneTag=${tag}]`, result);
-        else throw err(this, `${tag} is not a unique element below some node in ${this.#nodes}!`);
+        else throw err(this, `${tag} is not a unique element below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     someTags<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {
@@ -179,16 +179,20 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .map(elements => elements[0]);
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[someTags=${tag}]`, result);
-        else throw err(this, `${tag} not always present below some node in ${this.#nodes}!`);
+        else throw err(this, `${tag} not always present below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 }
 
 class ViewIntegrityError extends Error {
-    constructor(query: Query<any>, message: string, ...params: any[]) {
+    constructor(query: Query<never>, message: string, ...params: never[]) {
         super(`Error on Query ${query.path()}: ${message}`, ...params);
     }
 }
 
-function err(query: Query<any>, message: string) {
+function err(query: Query<never>, message: string) {
     return new ViewIntegrityError(query, message);
+}
+
+function nodeToStr(node: Element) {
+    return `${node.tagName}[#${node.id}]`
 }

@@ -17,5 +17,5 @@ export const data = {
         .value),
     drinks: fetch('/api/drinks')
         .then(response => response.json(), () => Error('Could not fetch drinks!'))
-        .then(json => new Map(Object.entries(json)) as Map<string, string>)
+        .then(json => new Map(Object.entries(json as {[s: string]: string})))
 }

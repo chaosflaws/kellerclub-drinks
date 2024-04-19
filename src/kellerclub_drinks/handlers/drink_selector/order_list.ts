@@ -11,7 +11,7 @@ export class InvisibleOrderList {
 
     constructor(eventId: number) {
         this.#eventId = eventId;
-        this.#key = `event-${eventId}-orders`;
+        this.#key = `event-${String(eventId)}-orders`;
     }
 
     /**
