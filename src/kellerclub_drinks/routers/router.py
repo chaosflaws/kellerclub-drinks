@@ -17,7 +17,7 @@ from ..handlers.add_drink import AddDrink
 from ..handlers.drink_list.drink_list import DrinkList
 from ..handlers.submit_order import SubmitOrder
 from ..handlers.drink_selector.drink_selector import DrinkSelector
-from ..handlers.common_handlers import StaticHandler
+from ..handlers.common_handlers import StaticHandler, RedirectHandler
 from ..handlers.handler import Handler
 from ..handlers.start_event import StartEvent
 from ..handlers.stop_event import StopEvent
@@ -141,19 +141,22 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/clear_orders':
-        parser = FormParser(Param('order', 1),
+        parser = FormParser(Param('order'),
                             SingleValueParam('event'))
         parsed_query = parser.parse(content.decode(), content_type=content_type)
         event_id = int(parsed_query['event'][0])
         return ClearOrders(event_id, referer)
     elif stripped_path == '/submit_order':
         try:
-            parser = FormParser(Param('order', 1),
+            parser = FormParser(Param('order'),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
-            return SubmitOrder(parsed_query['order'],
-                               datetime.fromtimestamp(int(parsed_query['event'][0])),
-                               RequestSource.FORM, referer or '')
+            if not len(parsed_query['order']):
+                return RedirectHandler(referer)
+            else:
+                return SubmitOrder(parsed_query['order'],
+                                   datetime.fromtimestamp(int(parsed_query['event'][0])),
+                                   RequestSource.FORM, referer or '')
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':

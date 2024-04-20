@@ -9,7 +9,8 @@ const orderList = Query(drinkGrid)
 
 const submitButton = Query(drinkGrid)
     .oneClass('order-list')
-    .oneTag('button')
+    .someTags('button')
+    .withClass('submit')
     .value();
 
 const orders = new OrderList(data.eventId, await data.drinks, orderList);
