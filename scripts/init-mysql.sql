@@ -4,7 +4,16 @@
 
 CREATE TABLE Drink (
     name VARCHAR(100) NOT NULL PRIMARY KEY,
-    display_name TEXT NOT NULL
+    display_name TEXT NOT NULL,
+    base_price SMALLINT UNSIGNED NOT NULL -- oldest reported price
+);
+
+CREATE TABLE Prices (
+    drink VARCHAR(100) NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    price SMALLINT UNSIGNED NOT NULL,
+
+    FOREIGN KEY (drink) REFERENCES Drink(name)
 );
 
 CREATE TABLE Event (

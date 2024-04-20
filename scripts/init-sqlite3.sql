@@ -3,7 +3,15 @@ PRAGMA busy_timeout = 10;
 
 CREATE TABLE Drink (
     name TEXT NOT NULL PRIMARY KEY,
-    display_name TEXT NOT NULL
+    display_name TEXT NOT NULL,
+    base_price INTEGER NOT NULL -- oldest reported price
+);
+
+CREATE TABLE Prices (
+    drink TEXT NOT NULL
+        REFERENCES Drink(name),
+    end_time NUMERIC NOT NULL,
+    price INTEGER NOT NULL
 );
 
 CREATE TABLE Event (

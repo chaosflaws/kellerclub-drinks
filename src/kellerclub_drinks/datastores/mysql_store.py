@@ -43,7 +43,7 @@ class MysqlStore(DataStore):
         conn = self.pool.get_connection()
         try:
             cursor: MySQLCursor = conn.cursor()
-            sql_template = "INSERT INTO Drink(name, display_name) VALUES (%s, %s)"
+            sql_template = "INSERT INTO Drink(name, display_name, base_price) VALUES (%s, %s, 1)"
             cursor.execute(sql_template, (drink.name, drink.display_name))
             conn.commit()
         finally:

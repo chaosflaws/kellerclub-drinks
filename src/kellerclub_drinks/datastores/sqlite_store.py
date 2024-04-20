@@ -34,7 +34,7 @@ class SqliteStore(DataStore):
     def add_drink(self, drink: Drink) -> None:
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
-            sql_template = "INSERT INTO Drink(name, display_name) VALUES (?, ?)"
+            sql_template = "INSERT INTO Drink(name, display_name, base_price) VALUES (?, ?, 1)"
             conn.execute(sql_template, (drink.name, drink.display_name))
 
     def start_event(self, start_time: Optional[datetime] = None,
