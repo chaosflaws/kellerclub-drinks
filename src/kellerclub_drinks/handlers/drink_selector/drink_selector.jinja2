@@ -38,7 +38,7 @@
             <button type="submit" value="">Einstellungen speichern</button>
         </form>
         {% if not autosubmit %}
-            <form method="POST" action="/submit_order?autosubmit=false">
+            <form method="POST" action="/submit_order">
                 <div class="order-list">
                     <h1>Bestellungen</h1>
                     <input class="hidden" name="event" value="{{ event_id }}">
@@ -49,7 +49,8 @@
                             <input class="hidden" name="order" value="{{ drink.name }}"></li>
                         {% endfor %}
                     </ul>
-                    <button>Eintragen</button>
+                    <button type="submit">Eintragen</button>
+                    <button type="submit" formaction="/clear_orders">Zurücksetzen</button>
                 </div>
             </form>
         {% endif %}

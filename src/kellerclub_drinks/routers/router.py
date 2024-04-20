@@ -10,6 +10,7 @@ from wsgiref.types import WSGIEnvironment
 from .form_parser import FormParser, SingleValueParam, BooleanParam, CheckboxParam, Param
 from .request_source import RequestSource
 from ..handlers.add_order import AddOrderToClient
+from ..handlers.clear_orders import ClearOrders
 from ..handlers.drink_selector.settings import DrinkSelectorSettings
 from ..handlers.errors.error import ErrorHandler
 from ..handlers.add_drink import AddDrink
@@ -139,6 +140,12 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
                                     referer or '/')
         except ValueError as e:
             return ErrorHandler(400, str(e))
+    elif stripped_path == '/clear_orders':
+        parser = FormParser(Param('order', 1),
+                            SingleValueParam('event'))
+        parsed_query = parser.parse(content.decode(), content_type=content_type)
+        event_id = int(parsed_query['event'][0])
+        return ClearOrders(event_id, referer)
     elif stripped_path == '/submit_order':
         try:
             parser = FormParser(Param('order', 1),
