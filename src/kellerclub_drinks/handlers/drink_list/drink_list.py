@@ -25,8 +25,8 @@ class DrinkList(ResistantHandler):
                                           drinks=drink_list)
                 return HtmlCreator(content.encode())
             case RequestSource.AJAX:
-                content = {key: drink_list[key].display_name
-                           for key in drink_list}
+                content = {key: (value.display_name, value.price)
+                           for key, value in drink_list.items()}
                 return AjaxCreator(content, 200)
             case _:
                 raise ValueError("Unsupported RequestSource!")
