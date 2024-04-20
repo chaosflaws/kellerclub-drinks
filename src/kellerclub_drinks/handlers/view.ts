@@ -209,5 +209,6 @@ function err(query: Query<never>, message: string) {
 }
 
 function nodeToStr(node: Element) {
-    return `${node.tagName}[#${node.id}]`
+    if (node.id) return `${node.tagName}[#${node.id}]`;
+    else return '<' + node.tagName + '>';
 }

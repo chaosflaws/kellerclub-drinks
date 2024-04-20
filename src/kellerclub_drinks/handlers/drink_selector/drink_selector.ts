@@ -10,7 +10,7 @@ export const gridButtons = Query(drinkGrid)
 
 export const data = {
     eventId: Number(Query(drinkGrid)
-        .oneClass('grid-form')
+        .oneClass('main-form')
         .someTags('input')
         .withName('event')
         .value()

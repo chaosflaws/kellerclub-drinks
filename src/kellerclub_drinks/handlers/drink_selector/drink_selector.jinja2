@@ -13,9 +13,9 @@
 {% block main_content %}
 {% set action = '/submit_order' if autosubmit else '/add_order' %}
 <div id="drink-grid" data-autosubmit="{{ autosubmit | string | lower }}">
-    <form class="grid-form" method="POST" action="{{ action }}">
+    <form class="main-form" method="POST" action="{{ action }}">
         <input class="hidden" name="event" value="{{ event_id }}">
-        <ul class="grid">
+        <ul class="selector-list">
             {% for row in layout.buttons %}
                 {% for button in row %}
                     {% if button is none %}

@@ -4,7 +4,11 @@
     gap: 1rem;
 }
 
-#drink-grid .grid {
+#drink-grid .main-form {
+    flex-basis: 100ex;
+}
+
+#drink-grid .selector-list {
     height: 100%;
     max-width: 100ex;
     max-height: 50em;
@@ -17,11 +21,11 @@
     padding: 0;
 }
 
-#drink-grid .grid li {
+#drink-grid .selector-list li {
     display: flex;
 }
 
-#drink-grid .grid li > * {
+#drink-grid .selector-list li > * {
     flex-grow: 1;
     cursor: pointer;
     touch-action: manipulation;
@@ -32,12 +36,12 @@
     font-size: .75em;
 }
 
-#drink-grid .grid button {
+#drink-grid .selector-list button {
     background: none;
     font-family: system-ui, sans-serif;
 }
 
-#drink-grid .grid a {
+#drink-grid .selector-list a {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -58,15 +62,15 @@
 }
 
 @media (width >= 131ex) {
-    #drink-grid .grid {
+    #drink-grid {
         flex-wrap: nowrap;
     }
 
-    #drink-grid .grid {
+    #drink-grid .selector-list {
         gap: .5rem;
     }
 
-    #drink-grid .grid li > * {
+    #drink-grid .selector-list li > * {
         padding: 1em;
 
         font-size: 1em;
