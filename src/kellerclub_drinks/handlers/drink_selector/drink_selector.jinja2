@@ -45,7 +45,7 @@
                     <ul>
                         {% for drink in stored_drinks %}
                         <li>
-                            {{ drink.display_name }}
+                            {{ drink.display_name }} {{ drink.price | euro }}
                             <input class="hidden" name="order" value="{{ drink.name }}"></li>
                         {% endfor %}
                     </ul>

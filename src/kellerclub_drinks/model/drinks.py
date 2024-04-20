@@ -17,6 +17,10 @@ class Drink:
         if not Drink.valid_name(self.name):
             raise ValueError('Invalid drink name!')
 
+    @property
+    def price(self) -> int:
+        return self.price_history.current
+
     @staticmethod
     def valid_name(name: str) -> bool:
         """True if name is a valid internal name, false otherwise."""
@@ -43,4 +47,4 @@ class PriceHistory:
     def current(self) -> int:
         """Current price."""
 
-        return next(iter(reversed(self.price_changes.values())))
+        return next(iter(reversed(self.price_changes.values())), self.base_price)

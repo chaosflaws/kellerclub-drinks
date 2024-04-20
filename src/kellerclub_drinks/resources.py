@@ -14,3 +14,4 @@ class Resources:
                                     autoescape=True,
                                     trim_blocks=True,
                                     undefined=StrictUndefined)
+        self.jinjaenv.filters['euro'] = lambda value: f'{value // 100},{value % 100} €'
