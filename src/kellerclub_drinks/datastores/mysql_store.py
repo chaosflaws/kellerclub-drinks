@@ -8,7 +8,7 @@ from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 
 from .layout_factory import from_button_rows
 from ..datastores.datastore import DataStore
-from ..model.drinks import Drink
+from ..model.drinks import Drink, PriceHistory
 from ..model.events import Event
 from ..model.layouts import Layout
 
@@ -34,8 +34,8 @@ class MysqlStore(DataStore):
         conn = self.pool.get_connection()
         try:
             cursor: MySQLCursor = conn.cursor()
-            cursor.execute("SELECT name, display_name FROM Drink")
-            return {row[0]: Drink(row[0], row[1]) for row in cursor}
+            cursor.execute("SELECT name, display_name, base_price FROM Drink")
+            return {row[0]: Drink(row[0], row[1], PriceHistory(row[2], {})) for row in cursor}
         finally:
             conn.close()
 

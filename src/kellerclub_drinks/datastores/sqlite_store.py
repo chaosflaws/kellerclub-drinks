@@ -6,7 +6,7 @@ from typing import Optional
 
 from .datastore import DataStore
 from .layout_factory import from_button_rows
-from ..model.drinks import Drink
+from ..model.drinks import Drink, PriceHistory
 from ..model.events import Event
 from ..model.layouts import Layout
 
@@ -28,8 +28,9 @@ class SqliteStore(DataStore):
     def all_drinks(self) -> dict[str, Drink]:
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
-            sql_template = "SELECT name, display_name FROM Drink"
-            return {row[0]: Drink(row[0], row[1]) for row in conn.execute(sql_template).fetchall()}
+            sql_template = "SELECT name, display_name, base_price FROM Drink"
+            return {row[0]: Drink(row[0], row[1], PriceHistory(row[2], {}))
+                    for row in conn.execute(sql_template).fetchall()}
 
     def add_drink(self, drink: Drink) -> None:
         with connect(self.path, uri=True) as conn:
