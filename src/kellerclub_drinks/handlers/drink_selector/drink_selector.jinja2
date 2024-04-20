@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block main_content %}
-{% set action = '/submit_order' if autosubmit else '/add_order' %}
+{% set action = '/orders/submit' if autosubmit else '/orders/add' %}
 <div id="drink-grid" data-autosubmit="{{ autosubmit | string | lower }}">
     <form class="main-form" method="POST" action="{{ action }}">
         <input class="hidden" name="event" value="{{ event_id }}">
@@ -38,7 +38,7 @@
             <button type="submit" value="">Einstellungen speichern</button>
         </form>
         {% if not autosubmit %}
-            <form method="POST" action="/submit_order">
+            <form method="POST" action="/orders/submit">
                 <div class="order-list">
                     <h1>Bestellungen</h1>
                     <input class="hidden" name="event" value="{{ event_id }}">
@@ -50,7 +50,7 @@
                         {% endfor %}
                     </ul>
                     <button class="submit" type="submit">Eintragen</button>
-                    <button type="submit" formaction="/clear_orders">Zurücksetzen</button>
+                    <button type="submit" formaction="/orders/clear">Zurücksetzen</button>
                 </div>
             </form>
         {% endif %}

@@ -9,13 +9,13 @@ from wsgiref.types import WSGIEnvironment
 
 from .form_parser import FormParser, SingleValueParam, BooleanParam, CheckboxParam, Param
 from .request_source import RequestSource
-from ..handlers.add_order import AddOrderToClient
-from ..handlers.clear_orders import ClearOrders
+from kellerclub_drinks.handlers.orders.add import AddOrder
+from kellerclub_drinks.handlers.orders.clear import Clear
 from ..handlers.drink_selector.settings import DrinkSelectorSettings
 from ..handlers.errors.error import ErrorHandler
 from ..handlers.add_drink import AddDrink
 from ..handlers.drink_list.drink_list import DrinkList
-from ..handlers.submit_order import SubmitOrder
+from kellerclub_drinks.handlers.orders.submit import Submit
 from ..handlers.drink_selector.drink_selector import DrinkSelector
 from ..handlers.common_handlers import StaticHandler, RedirectHandler
 from ..handlers.handler import Handler
@@ -128,25 +128,25 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
 
     # constant paths
     stripped_path = path.rstrip('/')
-    if stripped_path == '/add_order':
+    if stripped_path == '/orders/add':
         try:
             parser = FormParser(SingleValueParam('order'),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             event_id = int(parsed_query['event'][0])
-            return AddOrderToClient(parsed_query['order'][0],
-                                    event_id,
-                                    _get_orders(cookie, event_id),
-                                    referer or '/')
+            return AddOrder(parsed_query['order'][0],
+                            event_id,
+                            _get_orders(cookie, event_id),
+                            referer or '/')
         except ValueError as e:
             return ErrorHandler(400, str(e))
-    elif stripped_path == '/clear_orders':
+    elif stripped_path == '/orders/clear':
         parser = FormParser(Param('order'),
                             SingleValueParam('event'))
         parsed_query = parser.parse(content.decode(), content_type=content_type)
         event_id = int(parsed_query['event'][0])
-        return ClearOrders(event_id, referer)
-    elif stripped_path == '/submit_order':
+        return Clear(event_id, referer)
+    elif stripped_path == '/orders/submit':
         try:
             parser = FormParser(Param('order'),
                                 SingleValueParam('event'))
@@ -154,9 +154,9 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             if not len(parsed_query['order']):
                 return RedirectHandler(referer)
             else:
-                return SubmitOrder(parsed_query['order'],
-                                   datetime.fromtimestamp(int(parsed_query['event'][0])),
-                                   RequestSource.FORM, referer or '')
+                return Submit(parsed_query['order'],
+                              datetime.fromtimestamp(int(parsed_query['event'][0])),
+                              RequestSource.FORM, referer or '')
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
@@ -180,7 +180,7 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
         return DrinkSelectorSettings(parsed_query['autosubmit'][0], referer_url)
 
     # constant API paths
-    if stripped_path == '/api/submit_order':
+    if stripped_path == '/api/orders/submit':
         try:
             parsed_json = json.loads(content.decode())
             if 'orders' not in parsed_json:
@@ -196,9 +196,9 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
                 elif not isinstance(parsed_json['event'], int):
                     return ErrorHandler(400, "'event' is not a number!")
                 else:
-                    return SubmitOrder(parsed_json['orders'],
-                                       datetime.fromtimestamp(parsed_json['event']),
-                                       RequestSource.AJAX, referer or '/')
+                    return Submit(parsed_json['orders'],
+                                  datetime.fromtimestamp(parsed_json['event']),
+                                  RequestSource.AJAX, referer or '/')
         except ValueError:
             return ErrorHandler(400, f"Malformed JSON {content.decode()}!")
 

@@ -1,5 +1,5 @@
 function submit(eventId: number, orders: string[]) {
-    return fetch('/api/submit_order', {
+    return fetch('/api/orders/submit', {
         method: 'POST',
         body: JSON.stringify({'orders': orders, 'event': eventId})
     });

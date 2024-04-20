@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from http.cookies import SimpleCookie
 
 from kellerclub_drinks.handlers.add_drink import AddDrink
-from kellerclub_drinks.handlers.submit_order import SubmitOrder
+from kellerclub_drinks.handlers.orders.submit import Submit
 from kellerclub_drinks.handlers.common_handlers import StaticHandler
 from kellerclub_drinks.handlers.drink_list.drink_list import DrinkList
 from kellerclub_drinks.handlers.drink_selector.drink_selector import DrinkSelector
@@ -56,12 +56,12 @@ class TestRouter(unittest.TestCase):
 
     def test_post_routes(self) -> None:
         route_to_handler: dict[PostRequest, type[Handler]] = {
-            PostRequest('/submit_order',
+            PostRequest('/orders/submit',
                         'application/x-www-form-urlencoded',
-                        b'order=some_drink&event=100'): SubmitOrder,
-            PostRequest('/api/submit_order',
+                        b'order=some_drink&event=100'): Submit,
+            PostRequest('/api/orders/submit',
                         'application/json',
-                        b'{"orders":["some_drink"],"event":100}'): SubmitOrder
+                        b'{"orders":["some_drink"],"event":100}'): Submit
         }
 
         for req, handler in route_to_handler.items():
