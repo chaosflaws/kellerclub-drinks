@@ -32,7 +32,7 @@
         </ul>
     </form>
     <div class="sidebar">
-        <form id="settings" method="POST" action="/drink_selector_settings">
+        <form class="settings" method="POST" action="/settings/drink_selector">
             <input type="checkbox" name="autosubmit" id="autosubmit" {{ 'checked' if autosubmit else '' }}>
             <label for="autosubmit">Automatisch eintragen</label>
             <button type="submit" value="">Einstellungen speichern</button>

@@ -8,6 +8,15 @@ export const gridButtons = Query(drinkGrid)
     .anyTags('button')
     .value();
 
+const settings = Query(drinkGrid)
+    .someTags('form')
+    .withClass('settings')
+    .value();
+
+const submit = Query(settings)
+    .oneTag('button')
+    .value();
+
 export const data = {
     eventId: Number(Query(drinkGrid)
         .oneClass('main-form')
@@ -16,6 +25,14 @@ export const data = {
         .value()
         .value),
     drinks: fetch('/api/drinks')
-        .then(response => response.json(), () => Error('Could not fetch drinks!'))
+        .then(response => response.json())
         .then(json => new Map(Object.entries(json as {[s: string]: string})))
+}
+
+submit.classList.add('hidden');
+
+for (const element of settings.elements) {
+    element.addEventListener('click', () => {
+        settings.requestSubmit();
+    })
 }

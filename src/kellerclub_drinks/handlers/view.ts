@@ -7,6 +7,7 @@ interface Query<T extends Element | Element[]> {
     childWithName(name: string): Query<Element>;
     oneClass(className: string): Query<T>;
     someClasses(className: string): Query<Element[]>;
+    withClass(className: string): Query<Element>;
     oneTag(tag: keyof HTMLElementTagNameMap): Query<T>;
     someTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
     anyTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
@@ -56,9 +57,9 @@ class SingleQuery<T extends Element> implements Query<Element> {
     }
 
     withName(name: string) {
-        if (this.#node.getAttribute('name') != name)
-            throw err(this, `${nodeToStr(this.#node)} does not have name ${name}!`);
-        return new SingleQuery(this.#path + `[withName=${name}]`, this.#node);
+        if (this.#node.getAttribute('name') == name)
+            return new SingleQuery(this.#path + `[withName=${name}]`, this.#node);
+        throw err(this, `${nodeToStr(this.#node)} does not have name ${name}!`);
     }
 
     childWithName(name: string) {
@@ -77,6 +78,12 @@ class SingleQuery<T extends Element> implements Query<Element> {
         if (result.length)
             return new MultiQuery(this.#path + `[someClasses=${className}]`, [...result]);
         else throw err(this, `${className} not present!`);
+    }
+
+    withClass(className: string) {
+        if (!this.#node.classList.contains(className))
+            throw err(this, `${nodeToStr(this.#node)} does not have class ${className}!`);
+        return new SingleQuery(this.#path + `[withClass=${className}]`, this.#node);
     }
 
     oneTag<T extends keyof HTMLElementTagNameMap>(tag: T): SingleQuery<HTMLElementTagNameMap[T]> {
@@ -136,7 +143,7 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
             .filter(node => node.getAttribute('name') == name);
 
         if (result.length == 1) return new SingleQuery(this.#path + `[withName=${name}]`, result[0]);
-        else throw err(this, `${result.length == 0 ? 'No node' : 'More than one node'} in ${this.#nodes.map(node => nodeToStr(node)).join(',')} has name ${name}!`);
+        else throw err(this, `${!result.length ? 'No node' : 'More than one node'} has name ${name} in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     childWithName(name: string) {
@@ -166,6 +173,14 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[someClasses=${className}]`, result);
         else throw err(this, `${className} not always present on ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
+    }
+
+    withClass(className: string) {
+        const result = this.#nodes
+            .filter(node => node.classList.contains(className));
+
+        if (result.length == 1) return new SingleQuery(this.#path + `[withClass=${className}]`, result[0]);
+        else throw err(this, `${!result.length ? 'No node' : 'More than one node'} has class ${className} on ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
     }
 
     oneTag<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {

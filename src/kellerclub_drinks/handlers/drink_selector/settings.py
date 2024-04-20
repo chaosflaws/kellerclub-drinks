@@ -12,7 +12,7 @@ class DrinkSelectorSettings(ResistantHandler):
 
     @property
     def canonical_url(self) -> str:
-        return '/drink_selector_settings'
+        return '/settings/drink_selector'
 
     def _handle(self, res: Resources) -> ResponseCreator:
         query = self.url_parts.query

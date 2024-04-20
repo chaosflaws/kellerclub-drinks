@@ -163,7 +163,7 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
         return StartEvent()
     elif stripped_path == '/stop_event':
         return StopEvent()
-    elif stripped_path == '/drink_selector_settings':
+    elif stripped_path == '/settings/drink_selector':
         parser = FormParser(CheckboxParam('autosubmit'))
         parsed_query = parser.parse(content.decode(), content_type=content_type)
         referer_url = urlparse(referer)
