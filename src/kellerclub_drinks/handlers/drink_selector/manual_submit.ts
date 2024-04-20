@@ -14,6 +14,7 @@ const submitButton = Query(drinkGrid)
     .value();
 
 const orders = new OrderList(data.eventId, await data.drinks, orderList);
+orders.init();
 
 for (const button of gridButtons) {
     button.addEventListener('click', e => {
