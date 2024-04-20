@@ -4,8 +4,8 @@ export const drinkGrid = Query()
     .childWithId('drink-grid')
     .value();
 export const gridButtons = Query(drinkGrid)
-    .oneClass('grid')
-    .someTags('button')
+    .oneClass('selector-list')
+    .anyTags('button')
     .value();
 
 export const data = {

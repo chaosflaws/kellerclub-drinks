@@ -9,6 +9,7 @@ interface Query<T extends Element | Element[]> {
     someClasses(className: string): Query<Element[]>;
     oneTag(tag: keyof HTMLElementTagNameMap): Query<T>;
     someTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
+    anyTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
 }
 
 export function Query(): SingleQuery<HTMLElement>;
@@ -90,6 +91,11 @@ class SingleQuery<T extends Element> implements Query<Element> {
         if (result.length >= 1)
             return new MultiQuery(this.#path + `[someTags=${tag}]`, [...result]);
         else throw err(this, `${tag} not present below ${nodeToStr(this.#node)}!`);
+    }
+
+    anyTags<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {
+        const result = this.#node.getElementsByTagName(tag);
+        return new MultiQuery(this.#path + `[someTags=${tag}]`, [...result]);
     }
 }
 
@@ -180,6 +186,15 @@ class MultiQuery<T extends Element> implements Query<Element[]> {
 
         if (this.#nodes.length == result.length) return new MultiQuery(this.#path + `[someTags=${tag}]`, result);
         else throw err(this, `${tag} not always present below some node in ${this.#nodes.map(node => nodeToStr(node)).join(',')}!`);
+    }
+
+    anyTags<T extends keyof HTMLElementTagNameMap>(tag: T): MultiQuery<HTMLElementTagNameMap[T]> {
+        const result = this.#nodes
+            .map(node => node.getElementsByTagName(tag))
+            .filter(elements => elements.length >= 1)
+            .map(elements => elements[0]);
+
+        return new MultiQuery(this.#path + `[someTags=${tag}]`, result);
     }
 }
 
