@@ -24,7 +24,7 @@ const resetButton = Query(drinkGrid)
     .withClass('reset')
     .value();
 
-const orders = new OrderList(data.eventId, await data.drinks, orderList, sum);
+const orders = new OrderList(data.eventId, data.drinks, orderList, sum);
 orders.init();
 
 resetButton.classList.add('hidden');

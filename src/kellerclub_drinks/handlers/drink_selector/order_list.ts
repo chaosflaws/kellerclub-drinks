@@ -62,9 +62,9 @@ export class InvisibleOrderList {
 export class OrderList extends InvisibleOrderList {
     readonly #container: Element;
     readonly #sum: Element;
-    readonly #drinks: Map<string, Drink>;
+    readonly #drinks: Promise<Map<string, Drink>>;
 
-    constructor(eventId: number, drinks: Map<string, Drink>,
+    constructor(eventId: number, drinks: Promise<Map<string, Drink>>,
                 container: Element, sum: Element) {
         super(eventId);
         this.#container = container;
@@ -75,20 +75,22 @@ export class OrderList extends InvisibleOrderList {
     /**
      * Displays the orders in local storage in the target.
      */
-    init() {
+    async init() {
+        await this.#drinks;
+        this.#hideAll();
         for (const order of this.storage) {
-            this.#show(order);
+            void this.#show(order);
         }
-        this.#updateSum();
+        void this.#updateSum();
     }
 
     /**
      * Adds an order to local storage and displays it.
      */
-    add(order: string) {
+    async add(order: string) {
         super.add(order);
-        this.#show(order);
-        this.#updateSum();
+        void this.#show(order);
+        void this.#updateSum();
     }
 
     /**
@@ -98,7 +100,7 @@ export class OrderList extends InvisibleOrderList {
     remove(order: string) {
         super.remove(order);
         this.#hide(order);
-        this.#updateSum();
+        void this.#updateSum();
     }
 
     /**
@@ -108,12 +110,12 @@ export class OrderList extends InvisibleOrderList {
         if (this.storage.length) {
             await super.submit();
             this.#hideAll();
-            this.#updateSum();
+            void this.#updateSum();
         }
     }
 
-    #show(name: string) {
-        const drink = this.#drinks.get(name);
+    async #show(name: string) {
+        const drink = (await this.#drinks).get(name);
         if (!drink) throw Error(`Unknown drink internal name ${name}!`)
 
         const displayName = drink[0];
@@ -147,10 +149,11 @@ export class OrderList extends InvisibleOrderList {
         this.#container.replaceChildren();
     }
 
-    #updateSum() {
+    async #updateSum() {
+        const drinks = await this.#drinks;
         const price = this.storage
-            .map(order => this.#drinks.get(order)?.[1] ?? 0)
-            .reduce((x, y) => x+y, 0);
+            .map(order => drinks.get(order)?.[1] ?? 0)
+            .reduce((x, y) => x + y, 0);
         this.#sum.textContent = this.#euro(price);
     }
 

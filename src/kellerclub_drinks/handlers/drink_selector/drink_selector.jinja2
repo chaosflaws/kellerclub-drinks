@@ -53,9 +53,11 @@
                     <ul>
                         {% for drink in stored_drinks %}
                         {{ order_list_child(drink.display_name, drink.name, drink.price) }}
+                        {% else %}
+                        <li>Wird geladen…</li>
                         {% endfor %}
                     </ul>
-                    <p>Summe: <span class="sum"></span></p>
+                    <p>Summe: <span class="sum">…</span></p>
                     <button class="submit" type="submit">Eintragen</button>
                     <button class="reset" type="submit" formaction="/orders/clear">Zurücksetzen</button>
                 </div>
