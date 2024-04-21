@@ -1,3 +1,7 @@
+import {Query} from "../view.js";
+
+type Drink = [string, number];
+
 function submit(eventId: number, orders: string[]) {
     return fetch('/api/orders/submit', {
         method: 'POST',
@@ -56,13 +60,15 @@ export class InvisibleOrderList {
 }
 
 export class OrderList extends InvisibleOrderList {
-    readonly #target: Element;
-    readonly #drinks: Map<string, string>;
+    readonly #container: Element;
+    readonly #sum: Element;
+    readonly #drinks: Map<string, Drink>;
 
-    constructor(eventId: number, drinks: Map<string, string>,
-                target: Element) {
+    constructor(eventId: number, drinks: Map<string, Drink>,
+                container: Element, sum: Element) {
         super(eventId);
-        this.#target = target;
+        this.#container = container;
+        this.#sum = sum;
         this.#drinks = drinks;
     }
 
@@ -73,6 +79,7 @@ export class OrderList extends InvisibleOrderList {
         for (const order of this.storage) {
             this.#show(order);
         }
+        this.#updateSum();
     }
 
     /**
@@ -81,6 +88,7 @@ export class OrderList extends InvisibleOrderList {
     add(order: string) {
         super.add(order);
         this.#show(order);
+        this.#updateSum();
     }
 
     /**
@@ -90,6 +98,7 @@ export class OrderList extends InvisibleOrderList {
     remove(order: string) {
         super.remove(order);
         this.#hide(order);
+        this.#updateSum();
     }
 
     /**
@@ -99,32 +108,55 @@ export class OrderList extends InvisibleOrderList {
         if (this.storage.length) {
             await super.submit();
             this.#hideAll();
+            this.#updateSum();
         }
     }
 
     #show(name: string) {
-        const displayName = this.#drinks.get(name);
-        if (!displayName) throw Error(`Unknown drink internal name ${name}!`)
+        const drink = this.#drinks.get(name);
+        if (!drink) throw Error(`Unknown drink internal name ${name}!`)
 
-        const orderNode = this.#createOrderElement(name, displayName);
-        this.#target.appendChild(orderNode);
+        const displayName = drink[0];
+        const price = drink[1];
+
+        const orderNode = this.#createOrderElement(name, displayName, price);
+        this.#container.appendChild(orderNode);
     }
 
-    #createOrderElement(name: string, displayName: string) {
-        const orderNode = document.createElement('li');
-        orderNode.dataset.orderName = name;
-        orderNode.appendChild(document.createTextNode(displayName));
-        return orderNode;
+    #createOrderElement(name: string, displayName: string, price: number) {
+        const template = Query()
+            .someTags('template')
+            .withId('order-list-child')
+            .value();
+        const clone = template.content.cloneNode(true) as DocumentFragment;
+        const root = Query(clone);
+        root.oneClass('name').value().textContent = displayName;
+        root.oneClass('price').value().textContent = this.#euro(price);
+        root.oneTag('input').value().defaultValue = name;
+        return clone;
     }
 
     #hide(name: string) {
-        const candidates = this.#target.querySelectorAll(`[data-orderName="${name}"]`);
+        const candidates = this.#container.querySelectorAll(`[data-orderName="${name}"]`);
         if (!candidates.length) throw Error(`Should remove order ${name}, but not found!`);
 
         candidates[0].remove();
     }
 
     #hideAll() {
-        this.#target.replaceChildren();
+        this.#container.replaceChildren();
+    }
+
+    #updateSum() {
+        const price = this.storage
+            .map(order => this.#drinks.get(order)?.[1] ?? 0)
+            .reduce((x, y) => x+y, 0);
+        this.#sum.textContent = this.#euro(price);
+    }
+
+    #euro(price: number) {
+        const euros = String(Math.trunc(price / 100));
+        const cents = String(price % 100).padStart(2, '0');
+        return `${euros},${cents} €`;
     }
 }

@@ -5,10 +5,18 @@
 {% block css %}
 <link rel="stylesheet" href="/drink_selector/drink_selector.css">
 {% endblock %}
+
 {% block js %}
 {% set script = 'autosubmit' if autosubmit else 'manual_submit' %}
 <script type="module" src="/drink_selector/{{ script }}.js" defer></script>
 {% endblock %}
+
+{% macro order_list_child(display_name, name, price) %}
+<li>
+    <span class="name">{{ display_name }}</span> <span class="price">{{ price | euro }}</span>
+    <input class="hidden" name="order" value="{{ name }}">
+</li>
+{% endmacro %}
 
 {% block main_content %}
 {% set action = '/orders/submit' if autosubmit else '/orders/add' %}
@@ -44,11 +52,10 @@
                     <input class="hidden" name="event" value="{{ event_id }}">
                     <ul>
                         {% for drink in stored_drinks %}
-                        <li>
-                            {{ drink.display_name }} {{ drink.price | euro }}
-                            <input class="hidden" name="order" value="{{ drink.name }}"></li>
+                        {{ order_list_child(drink.display_name, drink.name, drink.price) }}
                         {% endfor %}
                     </ul>
+                    <p>Summe: <span class="sum"></span></p>
                     <button class="submit" type="submit">Eintragen</button>
                     <button type="submit" formaction="/orders/clear">Zurücksetzen</button>
                 </div>
@@ -56,4 +63,8 @@
         {% endif %}
     </div>
 </div>
+
+<template id="order-list-child">
+{{ order_list_child('', '', 0) }}
+</template>
 {% endblock %}

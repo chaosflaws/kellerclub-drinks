@@ -7,13 +7,18 @@ const orderList = Query(drinkGrid)
     .oneTag('ul')
     .value();
 
+const sum = Query(drinkGrid)
+    .oneClass('sidebar')
+    .oneClass('sum')
+    .value();
+
 const submitButton = Query(drinkGrid)
     .oneClass('order-list')
     .someTags('button')
     .withClass('submit')
     .value();
 
-const orders = new OrderList(data.eventId, await data.drinks, orderList);
+const orders = new OrderList(data.eventId, await data.drinks, orderList, sum);
 orders.init();
 
 for (const button of gridButtons) {

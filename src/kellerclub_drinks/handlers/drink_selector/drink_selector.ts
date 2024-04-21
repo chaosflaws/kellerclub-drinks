@@ -26,7 +26,7 @@ export const data = {
         .value),
     drinks: fetch('/api/drinks')
         .then(response => response.json())
-        .then(json => new Map(Object.entries(json as {[s: string]: string})))
+        .then(json => new Map(Object.entries(json as {[s: string]: [string, number]})))
 }
 
 submit.classList.add('hidden');
