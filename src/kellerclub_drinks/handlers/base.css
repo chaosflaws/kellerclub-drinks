@@ -316,3 +316,4 @@ body {
 }
 
 .bi-folder::before { content: "\f3d7"; }
+.bi-trash::before { content: "\f5de"; }

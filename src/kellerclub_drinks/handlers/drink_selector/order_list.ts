@@ -35,7 +35,10 @@ export class InvisibleOrderList {
         const index = orders.indexOf(order);
 
         if (index == -1) throw Error(`Order ${order} to be removed, but not found!`);
-        else this.storage = orders.splice(index, 1);
+        else {
+            orders.splice(index, 1);
+            this.storage = orders;
+        }
     }
 
     /**
@@ -89,8 +92,8 @@ export class OrderList extends InvisibleOrderList {
      */
     async add(order: string) {
         super.add(order);
-        void this.#show(order);
-        void this.#updateSum();
+        await this.#show(order);
+        return this.#updateSum();
     }
 
     /**
@@ -132,6 +135,7 @@ export class OrderList extends InvisibleOrderList {
             .value();
         const clone = template.content.cloneNode(true) as DocumentFragment;
         const root = Query(clone);
+        root.oneTag('li').value().dataset.orderName = name;
         root.oneClass('name').value().textContent = displayName;
         root.oneClass('price').value().textContent = this.#euro(price);
         root.oneTag('input').value().defaultValue = name;
@@ -139,10 +143,12 @@ export class OrderList extends InvisibleOrderList {
     }
 
     #hide(name: string) {
-        const candidates = this.#container.querySelectorAll(`[data-orderName="${name}"]`);
-        if (!candidates.length) throw Error(`Should remove order ${name}, but not found!`);
+        const candidates = this.#container.querySelectorAll(`[data-order-name="${name}"]`);
+        if (!candidates.length) throw Error(`Should hide order ${name}, but not found!`);
 
         candidates[0].remove();
+
+        void this.#updateSum();
     }
 
     #hideAll() {
