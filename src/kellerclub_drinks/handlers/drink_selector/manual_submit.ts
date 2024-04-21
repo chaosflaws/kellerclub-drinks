@@ -8,7 +8,7 @@ const orderList = Query(drinkGrid)
     .value();
 
 const sum = Query(drinkGrid)
-    .oneClass('sidebar')
+    .oneClass('order-list')
     .oneClass('sum')
     .value();
 
@@ -18,8 +18,16 @@ const submitButton = Query(drinkGrid)
     .withClass('submit')
     .value();
 
+const resetButton = Query(drinkGrid)
+    .oneClass('order-list')
+    .someTags('button')
+    .withClass('reset')
+    .value();
+
 const orders = new OrderList(data.eventId, await data.drinks, orderList, sum);
 orders.init();
+
+resetButton.classList.add('hidden');
 
 for (const button of gridButtons) {
     button.addEventListener('click', e => {
