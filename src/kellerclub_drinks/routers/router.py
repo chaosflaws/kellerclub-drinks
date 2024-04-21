@@ -22,7 +22,7 @@ from ..handlers.handler import Handler
 from ..handlers.start_event import StartEvent
 from ..handlers.stop_event import StopEvent
 from ..handlers.welcome_screen.welcome_screen import WelcomeScreen
-from ..model.drinks import Drink
+from ..model.drinks import Drink, PriceHistory
 
 
 def route(environ: WSGIEnvironment) -> Handler:
@@ -166,7 +166,7 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
             parsed_query = parser.parse(content.decode(), content_type=content_type)
             name = parsed_query['drink'][0]
             display_name = parsed_query['display_name'][0]
-            return AddDrink(Drink(name, display_name))
+            return AddDrink(Drink(name, display_name, PriceHistory(1, {})))
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/start_event':

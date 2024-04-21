@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 
 from kellerclub_drinks.datastores.sqlite_store import SqliteStore
-from kellerclub_drinks.model.drinks import Drink
+from kellerclub_drinks.model.drinks import Drink, PriceHistory
 from kellerclub_drinks.model.layouts import OrderButton
 
 
@@ -36,7 +36,7 @@ class TestSqliteStore(unittest.TestCase):
         drink_name = 'tap_beer'
         display_name = 'Tap Beer .4l'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
-        store.add_drink(Drink(drink_name, display_name))
+        store.add_drink(Drink(drink_name, display_name, PriceHistory(1, {})))
         start_time = datetime.now()
         store.start_event(start_time)
 
@@ -55,7 +55,7 @@ class TestSqliteStore(unittest.TestCase):
         display_name = 'Tap Beer .4l'
         layout_name = 'simple_layout'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
-        store.add_drink(Drink(drink_name, display_name))
+        store.add_drink(Drink(drink_name, display_name, PriceHistory(1, {})))
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             self._add_layout(db, layout_name)
             self._submit_order_button(db, layout_name, 0, 0, drink_name)
@@ -70,7 +70,7 @@ class TestSqliteStore(unittest.TestCase):
         display_name = 'Tap Beer .4l'
         layout_name = 'simple_layout'
         store = SqliteStore('file:drinks.db?mode=memory&cache=shared')
-        store.add_drink(Drink(drink_name, display_name))
+        store.add_drink(Drink(drink_name, display_name, PriceHistory(1, {})))
         with sqlite3.connect('file:drinks.db?mode=memory&cache=shared', uri=True) as db:
             self._add_layout(db, layout_name)
             self._submit_order_button(db, layout_name, 0, 0, drink_name)
