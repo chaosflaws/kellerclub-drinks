@@ -1,10 +1,11 @@
-const {copyFile, readFile, writeFile, utimes} = require('node:fs/promises');
-const {exec} = require('child_process');
-const {src, dest, parallel, series, watch} = require('gulp');
-const concat = require('gulp-concat');
-const cleanCss = require('gulp-clean-css');
-const ts = require('gulp-typescript');
-const eslint = require('gulp-eslint-new');
+import {copyFile, readFile, writeFile, utimes} from 'node:fs/promises';
+import {exec} from 'node:child_process';
+
+import {src, dest, parallel, series, watch} from 'gulp';
+import concat from 'gulp-concat';
+import cleanCss from 'gulp-clean-css';
+import ts from 'gulp-typescript';
+import eslint from 'gulp-eslint-new';
 
 function copyPython() {
     return src(['src/**/*.py', 'src/app.wsgi'])
@@ -82,7 +83,7 @@ function _watch() {
     watch('src/**/*.ts', parallel(tsLint, series(transpileTs, copyJs)));
 }
 
-function serve() {
+function _serve() {
     return exec('py scripts/local_server.py');
 }
 
@@ -93,7 +94,7 @@ const _default = series(
         series(copyTemplates, copyBinStatic, modifyBaseTemplate),
         minCss,
         series(transpileTs, copyJs)));
-exports.default = _default;
 
-exports.watch = series(_default, _watch);
-exports.serve = serve;
+export default _default;
+export const watchAll = series(_default, _watch);
+export const serve = _serve;
