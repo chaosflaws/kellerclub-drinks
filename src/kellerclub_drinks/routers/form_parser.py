@@ -40,7 +40,7 @@ class FormParser:
                                  f'({length}>{param.max_values})!')
             if param.allowed:
                 for value in values:
-                    if value not in param.allowed:
+                    if not param.allowed(value):
                         raise ValueError(f'Value {value} for key {param.key} not '
                                          f'in allowed values ({param.allowed})!')
             if param.cnv:
@@ -61,8 +61,12 @@ class Param(Generic[T]):
     max_values: Optional[int] = None
     _: dataclasses.KW_ONLY = None
     default: Optional[list[str]] = None
-    allowed: Optional[set[str]] = None
+    allowed: Optional[Callable[[str], bool]] = None
     cnv: Optional[Callable[[str], T]] = None
+
+
+def values_from(*args: str) -> Callable[[str], bool]:
+    return lambda v: v in args
 
 
 @dataclass(frozen=True)
@@ -73,7 +77,7 @@ class SingleValueParam(Param[T], Generic[T]):
     max_values: Optional[int] = field(default=1, init=False, repr=False)
 
 
-def _get_value(val: str) -> bool:
+def _get_bool_value(val: str) -> bool:
     normalized = val.strip().lower()
     if normalized == 'true':
         return True
@@ -86,17 +90,36 @@ def _get_value(val: str) -> bool:
 class BooleanParam(SingleValueParam[bool]):
     """Describes a boolean parameter."""
 
-    allowed: set[str] = field(default_factory=lambda: {'true', 'false'},
-                              init=False, repr=False)
-    cnv: Callable[[str], bool] = field(default=_get_value)
+    allowed: Callable[[str], bool] = field(default=lambda v: v in {'true', 'false'})
+
+    cnv: Callable[[str], bool] = field(default=_get_bool_value)
+
+
+@dataclass(frozen=True)
+class IntParam(SingleValueParam[int]):
+    """Describes a parameter with integer values."""
+
+    allowed: Callable[[str], bool] = field(default=lambda v: v.isdigit())
+
+    cnv: Callable[[str], int] = field(default=int)
 
 
 @dataclass(frozen=True)
 class CheckboxParam(Param[bool]):
     """Describes an encoded HTML form checkbox value."""
 
-    min_values: int = field(default=0, init=False, repr=False)
-    max_values: int = field(default=1, init=False, repr=False)
-    default: list[str] = field(default_factory=lambda: ['off'], init=False, repr=False)
-    allowed: set[str] = field(default_factory=lambda: {'on', 'off'}, init=False, repr=False)
+    min_values: int = field(default=0,
+                            init=False,
+                            repr=False)
+
+    max_values: int = field(default=1,
+                            init=False,
+                            repr=False)
+
+    default: list[str] = field(default_factory=lambda: ['off'],
+                               init=False,
+                               repr=False)
+
+    allowed: Callable[[str], bool] = field(default=lambda v: v in {'on', 'off'})
+
     cnv: Callable[[str], T] = field(default=lambda val: val == 'on')

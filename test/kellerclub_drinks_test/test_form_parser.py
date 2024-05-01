@@ -3,7 +3,8 @@
 
 import unittest
 
-from kellerclub_drinks.routers.form_parser import FormParser, Param, BooleanParam
+from kellerclub_drinks.routers.form_parser import FormParser, Param, \
+    BooleanParam, IntParam, CheckboxParam, values_from
 
 
 class TestFormParser(unittest.TestCase):
@@ -57,7 +58,7 @@ class TestFormParser(unittest.TestCase):
     def test_parser__has_allowed_values__values_must_be_in_allowed_values(self) -> None:
         query = 'key=first'
 
-        parser = FormParser(Param('key', 1, 1, allowed={'second'}))
+        parser = FormParser(Param('key', 1, 1, allowed=values_from('second')))
 
         self.assertRaises(ValueError, lambda: parser.parse(query))
 
@@ -67,3 +68,24 @@ class TestFormParser(unittest.TestCase):
         parser = FormParser(BooleanParam('key'))
 
         self.assertEqual({'key': [True]}, parser.parse(query))
+
+    def test_int_parser__value_zero__is_converted_to_zero(self) -> None:
+        query = 'key=0'
+
+        parser = FormParser(IntParam('key'))
+
+        self.assertEqual({'key': [0]}, parser.parse(query))
+
+    def test_checkbox_parser__value_on__returns_true(self) -> None:
+        query = 'key=on'
+
+        parser = FormParser(CheckboxParam('key'))
+
+        self.assertEqual({'key': [True]}, parser.parse(query))
+
+    def test_checkbox_parser__value_off__returns_false(self) -> None:
+        query = 'key=off'
+
+        parser = FormParser(CheckboxParam('key'))
+
+        self.assertEqual({'key': [False]}, parser.parse(query))
