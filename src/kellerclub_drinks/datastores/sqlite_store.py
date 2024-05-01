@@ -29,7 +29,7 @@ class SqliteStore(DataStore):
         with connect(self.path, uri=True) as conn:
             conn.execute("PRAGMA foreign_keys = ON;")
             sql_template = "SELECT name, display_name, base_price FROM Drink"
-            return {row[0]: Drink(row[0], row[1], PriceHistory(row[2], {}))
+            return {row[0]: Drink(row[0], row[1], {'default': PriceHistory(row[2], {})})
                     for row in conn.execute(sql_template).fetchall()}
 
     def add_drink(self, drink: Drink) -> None:

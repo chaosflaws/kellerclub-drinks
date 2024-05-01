@@ -25,7 +25,7 @@ class DrinkList(ResistantHandler):
                                           drinks=drink_list)
                 return HtmlCreator(content.encode())
             case RequestSource.AJAX:
-                content = {key: (value.display_name, value.price)
+                content = {key: (value.display_name, value.price('default'))
                            for key, value in drink_list.items()}
                 return AjaxCreator(content, 200)
             case _:

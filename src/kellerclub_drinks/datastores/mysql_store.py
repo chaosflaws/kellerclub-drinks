@@ -35,7 +35,7 @@ class MysqlStore(DataStore):
         try:
             cursor: MySQLCursor = conn.cursor()
             cursor.execute("SELECT name, display_name, base_price FROM Drink")
-            return {row[0]: Drink(row[0], row[1], PriceHistory(row[2], {})) for row in cursor}
+            return {row[0]: Drink(row[0], row[1], {'default': PriceHistory(row[2], {})}) for row in cursor}
         finally:
             conn.close()
 
