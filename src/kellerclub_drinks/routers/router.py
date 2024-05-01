@@ -145,18 +145,18 @@ def _route_post(path: str, referer: Optional[str], content_type: Optional[str],
                             SingleValueParam('event'))
         parsed_query = parser.parse(content.decode(), content_type=content_type)
         event_id = int(parsed_query['event'][0])
-        return Clear(event_id, referer)
+        return Clear(event_id, referer or '/')
     elif stripped_path == '/orders/submit':
         try:
             parser = FormParser(Param('order'),
                                 SingleValueParam('event'))
             parsed_query = parser.parse(content.decode(), content_type=content_type)
-            if not len(parsed_query['order']):
-                return RedirectHandler(referer)
+            if not parsed_query['order']:
+                return RedirectHandler(referer or '/')
             else:
                 return Submit(parsed_query['order'],
                               datetime.fromtimestamp(int(parsed_query['event'][0])),
-                              RequestSource.FORM, referer or '')
+                              RequestSource.FORM, referer or '/')
         except ValueError as e:
             return ErrorHandler(400, str(e))
     elif stripped_path == '/add_drink':
