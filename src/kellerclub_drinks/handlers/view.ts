@@ -1,32 +1,37 @@
-interface Query<T extends Element | Element[] | DocumentFragment> {
+export type Query<T extends Element | DocumentFragment> =
+    T extends Element ? SingleQuery<T> | MultiQuery<T> :
+        T extends DocumentFragment ? FragmentQuery : never;
+
+
+interface BaseQuery<T extends Element | Element[] | DocumentFragment> {
     path(): string;
     format(): string;
     value(): Element | Element[] | DocumentFragment;
 
-    childWithId(id: string): Query<Element>;
+    childWithId(id: string): BaseQuery<Element>;
 
-    oneName(name: string): Query<T>;
-    childWithName(name: string): Query<Element>;
+    oneName(name: string): BaseQuery<T>;
+    childWithName(name: string): BaseQuery<Element>;
 
-    oneClass(className: string): Query<T>;
-    someClasses(className: string): Query<Element[]>;
-    anyClasses(className: string): Query<Element[]>;
+    oneClass(className: string): BaseQuery<T>;
+    someClasses(className: string): BaseQuery<Element[]>;
+    anyClasses(className: string): BaseQuery<Element[]>;
 
-    oneTag(tag: keyof HTMLElementTagNameMap): Query<T>;
-    someTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
-    anyTags(tag: keyof HTMLElementTagNameMap): Query<Element[]>;
+    oneTag(tag: keyof HTMLElementTagNameMap): BaseQuery<T>;
+    someTags(tag: keyof HTMLElementTagNameMap): BaseQuery<Element[]>;
+    anyTags(tag: keyof HTMLElementTagNameMap): BaseQuery<Element[]>;
 }
 
-interface ElementQuery<T extends Element | Element[]> extends Query<T> {
-    parent(): Query<T>;
+interface ElementQuery<T extends Element | Element[]> extends BaseQuery<T> {
+    parent(): BaseQuery<T>;
 
-    withId(id: string): Query<Element>;
+    withId(id: string): BaseQuery<Element>;
 
-    withName(name: string): Query<Element>;
+    withName(name: string): BaseQuery<Element>;
 
-    withClass(className: string): Query<Element>;
+    withClass(className: string): BaseQuery<Element>;
 
-    withTag(tag: keyof HTMLElementTagNameMap): Query<Element>;
+    withTag(tag: keyof HTMLElementTagNameMap): BaseQuery<Element>;
 }
 
 export function Query(): SingleQuery<HTMLElement>;
@@ -40,7 +45,7 @@ export function Query(nodes?: Element | Element[] | DocumentFragment) {
     else return new MultiQuery(nodes.map(node => nodeToStr(node)).join(','), nodes);
 }
 
-class FragmentQuery implements Query<DocumentFragment> {
+class FragmentQuery implements BaseQuery<DocumentFragment> {
     readonly #node: DocumentFragment;
     readonly #path: string;
 
@@ -265,7 +270,7 @@ class MultiQuery<T extends Element> implements ElementQuery<Element[]> {
         else throw err(this, `${!result.length ? 'No node' : 'More than one node'} has ID ${id} in ${this.format()}!`);
     }
 
-    childWithId(id: string): Query<Element> {
+    childWithId(id: string): BaseQuery<Element> {
         const result = document.getElementById(id);
         if (result && this.#nodes.some(node => node.contains(result))) return new SingleQuery(this.#path + `[childWithId=${id}]`, result);
         else throw err(this, `ID ${id} not  found below some node in ${this.format()}!`);
@@ -368,12 +373,12 @@ class MultiQuery<T extends Element> implements ElementQuery<Element[]> {
 }
 
 class ViewIntegrityError extends Error {
-    constructor(query: Query<never>, message: string, ...params: never[]) {
+    constructor(query: BaseQuery<never>, message: string, ...params: never[]) {
         super(`Error on Query ${query.path()}: ${message}`, ...params);
     }
 }
 
-function err(query: Query<never>, message: string) {
+function err(query: BaseQuery<never>, message: string) {
     return new ViewIntegrityError(query, message);
 }
 

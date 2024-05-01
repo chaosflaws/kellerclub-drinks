@@ -27,12 +27,19 @@ const orders = new OrderList(data.eventId, data.drinks, orderListContent, sum);
 const initComplete = orders.init();
 
 resetButton.classList.add('hidden');
-void initComplete.then(initDeleteButtons);
+void initComplete.then(() => {
+    const initialItems = orderListItems(orderListQuery);
+    initDeleteButtons(initialItems);
+});
 
 for (const button of gridButtons) {
     button.addEventListener('click', e => {
         e.preventDefault();
-        void orders.add(button.value).then(initDeleteButtons);
+        void orders.add(button.value).then(() => {
+            const entries = orderListItems(orderListQuery);
+            const newEntry = entries[entries.length-1];
+            initDeleteButtons([newEntry]);
+        });
     });
 }
 submitButton.addEventListener('click', e => {
@@ -40,10 +47,8 @@ submitButton.addEventListener('click', e => {
     void orders.submit();
 });
 
-function initDeleteButtons() {
-    const deleteButtons = orderListQuery
-        .oneTag('ul')
-        .anyTags('li')
+function initDeleteButtons(entries: HTMLElement[]) {
+    const deleteButtons = Query(entries)
         .oneClass('bi-trash')
         .value();
     for (const button of deleteButtons) {
@@ -54,4 +59,11 @@ function initDeleteButtons() {
             orders.remove(value);
         })
     }
+}
+
+function orderListItems(parent: Query<Element>) {
+    return parent
+        .oneTag('ul')
+        .anyTags('li')
+        .value();
 }
